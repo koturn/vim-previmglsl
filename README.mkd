@@ -3,6 +3,10 @@
 Vim plugin for preview GLSL (only fragment shader).
 This plugin is inspired from [previm/previm.vim](https://github.com/previm/previm.vim)
 
+### ScreenShot
+
+![previmglsl](https://raw.githubusercontent.com/wiki/koturn/vim-previmglsl/images/previmglsl-example.gif)
+
 ## Supported GLSL version
 
 * GLSL ES 1.0
