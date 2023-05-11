@@ -1,0 +1,45 @@
+## PrevimGlsl
+
+Vim plugin for preview GLSL (only fragment shader).
+This plugin is inspired from [previm/previm.vim](https://github.com/previm/previm.vim)
+
+## Supported GLSL version
+
+* GLSL ES 1.0
+    * Browser must support WebGL 1.0 or above.
+* GLSL ES 3.0
+    * Browser must support WebGL 2.0.
+
+## Dependencies
+
+### For open preview
+
+No need for extra libraries or plug-ins.
+
+It can, however, be integrated with [open-browser.vim](https://github.com/tyru/open-browser.vim). For detailed usages, please see below.
+
+## Usage
+
+1. Define `g:previmglsl_open_cmd` in .vimrc
+    * This command is used in terminal for opening your browser.
+    * For example, uses Safari on Mac `let g:previmglsl_open_cmd = 'open -a Safari'`
+    * `:help g:previmglsl_open_cmd` for more details
+    * You can skip this setting if you're using open-browser.
+2. Start editing the file of Markdown.(`filetype` is `markdown`)
+3. Run `:PrevimGlslOpen` to open browser to preview
+4. Back to Vim to edit your file
+5. Update the file, and the content for previewing will be updated automatically
+
+To force a refresh run `:PrevimGlslRefresh`. To clear the preview cache (in dir PLUGIN_INSTALL/preview) run `:PrevimGlslWipeCache`.
+
+There is an issue using Safari 13.0.3, which page transition stops after "Loading...".
+
+You need to set up below to make previmglsl work on Safari.
+
+1. Safari > Preference > Advanced > check "Show develop menu" in menubar
+2. Develop > Disable Local File Restrictions
+
+
+## LICENSE
+
+This software is released under the public domain, see [LICENSE](LICENSE "LICENSE").

@@ -1,0 +1,158 @@
+*previmglsl.txt*	Preview Plugin for GLSL
+
+Version: 1.8.1
+Author: kanno <akapanna@gmail.com>
+Maintainer: previmglsl developers
+
+==============================================================================
+CONTENTS						*previmglsl-contents*
+
+Introduction						|previmglsl-introduction|
+Dependencies						|previmglsl-depends|
+Usage							|previmglsl-usage|
+Commands						|previmglsl-command|
+Functions						|previmglsl-functions|
+Settings						|previmglsl-settings|
+Using with open-browser.vim				|previmglsl-openbrowser|
+Changelog						|previmglsl-changelog|
+
+
+==============================================================================
+INDRODUCTION						*previmglsl-introduction*
+
+This plugin provides the functionality of displaying GLSL file previews on
+browsers. It achieves something similar to real-time previewing.
+
+[Supported Language Version]
+	- GLSL ES 1.0
+	- GLSL ES 3.0
+
+Latest revision:
+http://github.com/previmglsl/previmglsl
+
+
+==============================================================================
+DEPENDENCIES						*previmglsl-depends*
+
+[Required]
+	None
+
+[Optional]
+	- open-browser.vim(https://github.com/tyru/open-browser.vim)
+
+
+==============================================================================
+USAGE							*previmglsl-usage*
+
+This is an example of the case of markdown.
+The basic operation is the same in other formats.
+
+1. Set |g:previmglsl_open_cmd| in your .vimrc. This is unnecessary if you are using
+open-browser.vim.
+2. Start editing a file with |filetype| of Markdown.
+3. Open preview on browser with |:PrevimGlslOpen|.
+4. Go back to the buffer and edit some more.
+5. Changes are reflected on the page shown in the browser each update.
+
+==============================================================================
+COMMANDS						*previmglsl-command*
+
+							*:PrevimGlslOpen*
+:PrevimGlslOpen
+	Opens the current file on the browser.
+	
+							*:PrevimGlslWipeCache*
+:PrevimGlslWipeCache
+	Delete all previews in the cache.
+	
+							*:PrevimGlslRefresh*
+:PrevimGlslRefresh
+	Force a refresh of the preview.
+
+
+==============================================================================
+FUNCTIONS						*previmglsl-functions*
+
+previmglsl#open({path})					*previmglsl#open()*
+	Set {path} to the URL to open in browser.
+
+previmglsl#refresh()					*previmglsl#refresh()*
+	Apply the changes made to the file. This will automatically update
+	the page shown in the browser.
+
+
+==============================================================================
+SETTINGS						*previmglsl-settings*
+
+
+g:previmglsl_open_cmd					*g:previmglsl_open_cmd*
+	Type:String
+
+	Specify the command to be executed with |:PrevimGlslOpen|. openbrowser#open
+	is executed if no command is specified.
+	Also see |previmglsl-openbrowser|.
+
+	The following sample configuration opens with Firefox or Google Chrome on Mac.
+>
+	" .vimrc
+        # open by FireFox
+	let g:previmglsl_open_cmd = 'open -a Firefox'
+
+        # open with Google Chrome
+        let g:previmglsl_open_cmd = 'open -a Google\ Chrome'
+<
+
+g:previmglsl_enable_realtime			*g:previmglsl_enable_realtime*
+	Type:Num
+
+	You can select whether you want to preview the changes in real time.
+	Changes are reflected only at the timing if the value 0.
+
+	  * When saving a file
+
+	If the value is 1, I can preview in near real-time.
+	It is set to 0 by default.
+
+	The case of changing this value after opening a file to preview is
+	You need to re-open the file to preview in order to reflect the setting.
+>
+	" .vimrc
+	" Realtime preview
+	let g:previmglsl_enable_realtime = 1
+
+g:previmglsl_show_header					*g:previmglsl_show_header*
+	Type:Num
+
+	If the value is 1, it will display a header at the time of preview.
+	The header displays the file name and update datetime that you are editing.
+
+	If the value is 0, it does not display the header at the time of preview.
+	It is set to 1 by default.
+
+>
+	" .vimrc
+	let g:previmglsl_show_header = 0
+
+
+==============================================================================
+USING WITH OPEN-BROWSER.VIM				*previmglsl-openbrowser*
+
+The following steps are taken for choosing which browser to display the
+preview on.
+
+1. Attempt to execute command that is set to |g:previmglsl_open_cmd|
+  - If |g:previmglsl_open_cmd| is undefined or empty, proceed to step 2
+2. Attempt open browser with openbrowser#open()
+  - If open-browser.vim is not installed, proceed to step 3
+3. Exit after displaying message to standard error about not being able to
+   find any command to execute.
+
+Thus, |g:previmglsl_open_cmd| need not be configured when using open-browser.vim.
+
+==============================================================================
+CHANGELOG						*previmglsl-changelog*
+
+1.0	2023-05-11
+	- first release
+
+vim:tw=78:ts=8:ft=help:norl:noexpandtab
