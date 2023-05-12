@@ -70,7 +70,7 @@
   /**
    * Determine if reloading is necessary, and if so, rebuild the program and reload.
    */
-  function loadPreview() {
+  async function loadPreview() {
     let needReload = false;
     // These functions are defined as the file generated dynamically.
     //   generator-file: preview/autoload/previm.vim
@@ -92,7 +92,11 @@
       const fsText = getContent();
       try {
         if (renderer === null) {
-          renderer = new GlslQuadRenderer(canvas);
+          if (getFileType() === 'glsl') {
+            renderer = new GlslQuadRenderer(canvas);
+          } else {
+            renderer = await WgslQuadRenderer.create(canvas);
+          }
         }
 
         if (intervalId !== -1) {
@@ -109,6 +113,8 @@
         console.error(e);
       }
     }
+
+    return 0;
   }
 
   /**
@@ -118,8 +124,8 @@
     const script = doc.createElement('script');
     script.type = 'text/javascript';
     script.src = 'js/content.js?t=' + new Date().getTime();
-    script.addEventListener('load', () => {
-      loadPreview();
+    script.addEventListener('load', async () => {
+      await loadPreview();
       global.setTimeout(() => script.parentNode.removeChild(script), 160);
     });
     doc.getElementsByTagName('head')[0].appendChild(script);
