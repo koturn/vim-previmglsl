@@ -133,7 +133,7 @@ function! s:function_template() abort " {{{
         \ '}',
         \ '',
         \ 'function getFileType() {',
-        \ printf('  return "%s";', &filetype),
+        \ printf('  return "%s";', s:get_filetype()),
         \ '}',
         \ '',
         \ 'function getLastModified() {',
@@ -147,6 +147,16 @@ function! s:function_template() abort " {{{
         \ printf('  return %s;', previmglsl#options()),
         \ '}',
         \], s:newline_character)
+endfunction " }}}
+
+" デフォルトのVimではglsl, wgslのファイルタイプ判別ができないはず
+" そのため、&filetypeが空のときは拡張子からファイルタイプ判別を行う
+function! s:get_filetype() abort " {{{
+  if &filetype !=# ''
+    return &filetype
+  endif
+  let ext = tolower(expand('%:e'))
+  return ext ==# 'vert' || ext ==# 'frag' ? 'glsl' : ext
 endfunction " }}}
 
 function! s:get_last_modified_time() abort " {{{
