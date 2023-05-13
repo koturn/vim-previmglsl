@@ -1,18 +1,27 @@
 ## PrevimGlsl
 
-Vim plugin for preview GLSL (only fragment shader).
-This plugin is inspired from [previm/previm.vim](https://github.com/previm/previm.vim)
+Vim plugin for preview GLSL and WGSL (only fragment shader).
+This plugin is inspired from [previm/previm](https://github.com/previm/previm)
 
 ### ScreenShot
 
-![previmglsl](https://raw.githubusercontent.com/wiki/koturn/vim-previmglsl/images/previmglsl-example.gif)
+#### GLSL
 
-## Supported GLSL version
+![GLSL preview](https://raw.githubusercontent.com/wiki/koturn/vim-previmglsl/images/previmglsl-example.gif)
+
+#### WGSL
+
+![WGSL preview](https://raw.githubusercontent.com/wiki/koturn/vim-previmglsl/images/previmglsl-example-wgsl.gif)
+
+## Supported Languages
 
 * GLSL ES 1.0
     * Browser must support WebGL 1.0 or above.
 * GLSL ES 3.0
     * Browser must support WebGL 2.0.
+* WGSL
+    * Browser must support WebGPU.
+    * **EXPERIMENTAL**
 
 ## Dependencies
 
