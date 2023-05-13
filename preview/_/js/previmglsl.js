@@ -22,6 +22,11 @@
    */
   let canvas;
   /**
+   * Canvas.
+   * @type {HTMLPreElement}
+   */
+  let compilerMessagesElement;
+  /**
    * Mouse move offset of X.
    * @type {number}
    */
@@ -48,6 +53,7 @@
       mx = e.offsetX / canvas.width;
       my = e.offsetY / canvas.height;
     }, true);
+    compilerMessagesElement = doc.getElementById('compiler-messages');
     loadContentScript();
     global.setInterval(loadContentScript, 1000);
   });
@@ -109,8 +115,12 @@
 
         baseTime = d.getTime();
         intervalId = global.setInterval(render, fps);
+        canvas.style.display = '';
+        compilerMessagesElement.innerText = '';
       } catch (e) {
         console.error(e);
+        canvas.style.display = 'none';
+        compilerMessagesElement.innerText = e.message;
       }
     }
 

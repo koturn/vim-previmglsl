@@ -13,3 +13,7 @@ canvas {
   height: 100vh;
   display: block;
 }
+#compiler-messages {
+  color: red;
+  background-color: black;
+}
