@@ -108,12 +108,13 @@
         if (intervalId !== -1) {
           clearInterval(intervalId);
         }
-        renderer.build(fsText);
 
-        const d = new Date();
-        console.log("Rebuild done: " + d);
+        measureTime(
+          () => renderer.build(fsText),
+          elapsed => console.log('Build success: ' + new Date() + ', elapsed: ' + elapsed.toFixed(3) + ' msec'),
+          elapsed => console.error('Build failed: ' + new Date() + ', elapsed: ' + elapsed.toFixed(3) + ' msec'));
 
-        baseTime = d.getTime();
+        baseTime = new Date().getTime();
         intervalId = global.setInterval(render, fps);
         canvas.style.display = '';
         compilerMessagesElement.innerText = '';
@@ -139,5 +140,23 @@
       global.setTimeout(() => script.parentNode.removeChild(script), 160);
     });
     doc.getElementsByTagName('head')[0].appendChild(script);
+  }
+
+  /**
+   * Measure time.
+   * @param {function} f Measure target action.
+   * @param {function(number)} onSuccess Callback function on success.
+   * @param {function(number)} onFailure Callback function on failure.
+   */
+  function measureTime(f, onSuccess, onFailure) {
+    const start = performance.now();
+    try {
+      f();
+      const t1 = performance.now();
+      onSuccess(performance.now() - start);
+    } catch (e) {
+      onFailure(performance.now() - start);
+      throw e;
+    }
   }
 })((this || 0).self || global);
