@@ -7,11 +7,6 @@
    */
   const doc = global.document;
   /**
-   * Framerate
-   * @type {number}
-   */
-  const fps = 1000 / 60;
-  /**
    * GLSL renderer.
    * @type {GlslQuadRenderer}
    */
@@ -22,7 +17,12 @@
    */
   let canvas;
   /**
-   * Canvas.
+   * Framerate area.
+   * @type {HTMLDivElement}
+   */
+  let fpsElement;
+  /**
+   * Comiler messages area.
    * @type {HTMLPreElement}
    */
   let compilerMessagesElement;
@@ -37,15 +37,10 @@
    */
   let my = 0.0;
   /**
-   * Interval ID for render().
-   * @type {number}
+   * Animator.
+   * @type {Animator}
    */
-  let intervalId = -1;
-  /**
-   * Base timestamp.
-   * @type {number}
-   */
-  let baseTime;
+  let animator = new Animator();
 
   window.addEventListener('load', () => {
     canvas = doc.getElementById('canvas');
@@ -53,6 +48,7 @@
       mx = e.offsetX / canvas.width;
       my = e.offsetY / canvas.height;
     }, true);
+    fpsElement = doc.getElementById('fps');
     compilerMessagesElement = doc.getElementById('compiler-messages');
     loadContentScript();
     global.setInterval(loadContentScript, 1000);
@@ -61,15 +57,15 @@
   /**
    * Render created GLSL program.
    */
-  function render() {
-    const elapsedTime = (new Date().getTime() - baseTime) * 0.001;
+  function render(now, t, st) {
+    const time = animator.elapsedFromStart * 0.001;
 
     const w = window.innerWidth;
     const h = window.innerHeight;
     canvas.width = w;
     canvas.height = h;
 
-    renderer.setUniforms(elapsedTime, mx, my, w, h);
+    renderer.setUniforms(time, mx, my, w, h);
     renderer.render(w, h);
   }
 
@@ -105,17 +101,14 @@
           }
         }
 
-        if (intervalId !== -1) {
-          clearInterval(intervalId);
-        }
+        animator.stop();
 
         measureTime(
           () => renderer.build(fsText),
           elapsed => console.log('Build success: ' + new Date() + ', elapsed: ' + elapsed.toFixed(3) + ' msec'),
           elapsed => console.error('Build failed: ' + new Date() + ', elapsed: ' + elapsed.toFixed(3) + ' msec'));
 
-        baseTime = new Date().getTime();
-        intervalId = global.setInterval(render, fps);
+        animator.start(render);
         canvas.style.display = '';
         compilerMessagesElement.innerText = '';
       } catch (e) {
@@ -140,6 +133,7 @@
       global.setTimeout(() => script.parentNode.removeChild(script), 160);
     });
     doc.getElementsByTagName('head')[0].appendChild(script);
+    fpsElement.innerText = animator.smoothedFps.toFixed(2);
   }
 
   /**
