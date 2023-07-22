@@ -43,7 +43,7 @@ class GlslQuadRenderer {
     if (this.#gl === null) {
       throw new Error('WebGL 2.0 or WebGL is not supported.');
     }
-    this.uniformLocations = new Array();
+    this.uniformLocations = new Array(3);
   }
 
   /**
