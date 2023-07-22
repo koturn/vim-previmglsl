@@ -164,7 +164,7 @@ class GlslQuadRenderer {
    * @type {string}
    */
   static get vsText100es() {
-    return "attribute vec3 position;\nvoid main(void)\n{\n  gl_Position = vec4(position, 1.0);\n}";
+    return "attribute vec3 position;\nvoid main(void)\n{\n  gl_Position = vec4(position, 1.0);\n}\n";
   }
 
   /**
@@ -172,6 +172,6 @@ class GlslQuadRenderer {
    * @type {string}
    */
   static get vsText300es() {
-    return "#version 300 es\nin vec3 position;\nvoid main(void)\n{\n  gl_Position = vec4(position, 1.0);\n}";
+    return "#version 300 es\nin vec3 position;\nvoid main(void)\n{\n  gl_Position = vec4(position, 1.0);\n}\n";
   }
 }
