@@ -47,6 +47,11 @@ class WgslQuadRenderer {
    */
   #verticesBuffer;
   /**
+   * GPUBuffer for vertex indices.
+   * @type {GPUBuffer}
+   */
+  #indicesBuffer;
+  /**
    * GPUBuffer for uniform variables.
    * @type {GPUBuffer}
    */
@@ -67,17 +72,17 @@ class WgslQuadRenderer {
    * @param {HTMLCanvasElement} canvas Render target canvas.
    */
   constructor(canvas, device, presentationFormat) {
-    this.webgpu = canvas.getContext('webgpu');
-    if (this.webgpu === null) {
+    this.#webgpu = canvas.getContext('webgpu');
+    if (this.#webgpu === null) {
       throw new Error('WebGPU is not supported: Failed to get webgpu context.');
     }
-    this.webgpu.configure({
+    this.#webgpu.configure({
       device,
       format: presentationFormat,
       alphaMode: 'premultiplied',
     });
-    this.device = device;
-    this.presentationFormat = presentationFormat;
+    this.#device = device;
+    this.#presentationFormat = presentationFormat;
 
     const verticesBuffer = device.createBuffer({
       size: WgslQuadRenderer.#vertices.byteLength,
@@ -86,7 +91,7 @@ class WgslQuadRenderer {
     });
     new Float32Array(verticesBuffer.getMappedRange()).set(WgslQuadRenderer.#vertices);
     verticesBuffer.unmap();
-    this.verticesBuffer = verticesBuffer;
+    this.#verticesBuffer = verticesBuffer;
 
     const indicesBuffer = device.createBuffer({
       size: WgslQuadRenderer.#triangles.byteLength,
@@ -95,15 +100,15 @@ class WgslQuadRenderer {
     });
     new Uint16Array(indicesBuffer.getMappedRange()).set(WgslQuadRenderer.#triangles);
     indicesBuffer.unmap();
-    this.indicesBuffer = indicesBuffer;
+    this.#indicesBuffer = indicesBuffer;
 
     const uniformBuffer = device.createBuffer({
       size: 6 * Float32Array.BYTES_PER_ELEMENT,  // 24 is minumum binding size.
       usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
     });
-    this.uniformBuffer = uniformBuffer;
+    this.#uniformBuffer = uniformBuffer;
 
-    this.uniformDataArray = new Float32Array(6);
+    this.#uniformDataArray = new Float32Array(6);
   }
 
   /**
@@ -116,10 +121,10 @@ class WgslQuadRenderer {
       vsText = WgslQuadRenderer.vsDefaultText;
     }
 
-    this.pipeline = this.device.createRenderPipeline({
+    this.#pipeline = this.#device.createRenderPipeline({
       layout: 'auto',
       vertex: {
-        module: this.device.createShaderModule({
+        module: this.#device.createShaderModule({
           code: vsText
         }),
         entryPoint: 'main',
@@ -137,13 +142,13 @@ class WgslQuadRenderer {
         ]
       },
       fragment: {
-        module: this.device.createShaderModule({
+        module: this.#device.createShaderModule({
           code: fsText
         }),
         entryPoint: 'main',
         targets: [
           {
-            format: this.presentationFormat
+            format: this.#presentationFormat
           }
         ]
       },
@@ -152,13 +157,13 @@ class WgslQuadRenderer {
       }
     });
 
-    this.bindGroup = this.device.createBindGroup({
-      layout: this.pipeline.getBindGroupLayout(0),
+    this.#bindGroup = this.#device.createBindGroup({
+      layout: this.#pipeline.getBindGroupLayout(0),
       entries: [
         {
           binding: 0, // @binding(0) in shader
           resource: {
-            buffer: this.uniformBuffer
+            buffer: this.#uniformBuffer
           }
         }
       ]
@@ -174,13 +179,13 @@ class WgslQuadRenderer {
    * @param {number} height Height of viewport.
    */
   setUniforms(time, mx, my, width, height) {
-    this.uniformDataArray[0] = time;
-    this.uniformDataArray[1] = 0.0;  // Padding of struct.
-    this.uniformDataArray[2] = mx;
-    this.uniformDataArray[3] = my;
-    this.uniformDataArray[4] = width;
-    this.uniformDataArray[5] = height;
-    this.device.queue.writeBuffer(this.uniformBuffer, 0, this.uniformDataArray);
+    this.#uniformDataArray[0] = time;
+    this.#uniformDataArray[1] = 0.0;  // Padding of struct.
+    this.#uniformDataArray[2] = mx;
+    this.#uniformDataArray[3] = my;
+    this.#uniformDataArray[4] = width;
+    this.#uniformDataArray[5] = height;
+    this.#device.queue.writeBuffer(this.#uniformBuffer, 0, this.#uniformDataArray);
   }
 
   /**
@@ -189,8 +194,8 @@ class WgslQuadRenderer {
    * @param {number} height Height of viewport.
    */
   render(width, height) {
-    const commandEncoder = this.device.createCommandEncoder();
-    const textureView = this.webgpu.getCurrentTexture().createView();
+    const commandEncoder = this.#device.createCommandEncoder();
+    const textureView = this.#webgpu.getCurrentTexture().createView();
     const renderPassDescriptor = {
       colorAttachments: [
         {
@@ -204,14 +209,14 @@ class WgslQuadRenderer {
 
     const passEncoder = commandEncoder.beginRenderPass(renderPassDescriptor);
     passEncoder.setViewport(0.0, 0.0, width, height, 0.0, 1.0);
-    passEncoder.setPipeline(this.pipeline);
-    passEncoder.setBindGroup(0, this.bindGroup);
-    passEncoder.setVertexBuffer(0, this.verticesBuffer);
-    passEncoder.setIndexBuffer(this.indicesBuffer, 'uint16');
+    passEncoder.setPipeline(this.#pipeline);
+    passEncoder.setBindGroup(0, this.#bindGroup);
+    passEncoder.setVertexBuffer(0, this.#verticesBuffer);
+    passEncoder.setIndexBuffer(this.#indicesBuffer, 'uint16');
     passEncoder.drawIndexed(WgslQuadRenderer.#triangles.length);
     passEncoder.end();
 
-    this.device.queue.submit([commandEncoder.finish()]);
+    this.#device.queue.submit([commandEncoder.finish()]);
   }
 
   /**
