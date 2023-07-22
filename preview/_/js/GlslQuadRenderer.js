@@ -53,7 +53,7 @@ class GlslQuadRenderer {
    */
   build(fsText, vsText) {
     if (typeof vsText === 'undefined') {
-      vsText = fsText.match(/^\s*#\s*version\s*300\s+es/) === null ? GlslQuadRenderer.vsText100es : GlslQuadRenderer.vsText300es
+      vsText = fsText.match(/^\s*#\s*version\s+300\s+es/) === null ? GlslQuadRenderer.vsText100es : GlslQuadRenderer.vsText300es
     }
 
     const program = this.#createProgram(
