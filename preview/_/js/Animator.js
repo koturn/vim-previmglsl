@@ -9,6 +9,12 @@ class Animator {
    */
   #startTime;
   /**
+   * High resolution timestamp when animation is stopped,
+   * which the timestamp represents the time elapsed since Performance.timeOrigin (in milliseconds).
+   * @type {number}
+   */
+  #stopTime;
+  /**
    * Elapsed time per one frame.
    * @type {number}
    */
@@ -29,6 +35,7 @@ class Animator {
    */
   constructor() {
     this.#startTime = 0.0;
+    this.#stopTime = 0.0;
     this.#timePerFrame = 0.0;
     this.#smoothedTimePerFrame = 0.0;
     this.#stop = null;
@@ -53,6 +60,7 @@ class Animator {
     stop();
 
     this.#startTime = performance.now();
+    this.#stopTime = this.#startTime;
     let prevTime = this.#startTime;
 
     let smoothingCount = 0;
@@ -108,6 +116,7 @@ class Animator {
     this.#stop = null;
     this.#timePerFrame = 0.0;
     this.#smoothedTimePerFrame = 0.0;
+    this.#stopTime = performance.now();
   }
 
   /**
@@ -123,7 +132,7 @@ class Animator {
    * @type {number}
    */
   get elapsedFromStart() {
-    return this.#stop === null ? 0.0 : performance.now() - this.#startTime;
+    return (this.#stop === null ? this.#stopTime : performance.now()) - this.#startTime;
   }
 
   /**
