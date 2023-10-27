@@ -109,7 +109,7 @@ class Animator {
    * Start to call the function.
    */
   stop() {
-    if (this.#stop === null) {
+    if (this.isStopped) {
       return;
     }
     this.#stop();
@@ -132,7 +132,7 @@ class Animator {
    * @type {number}
    */
   get elapsedFromStart() {
-    return (this.#stop === null ? this.#stopTime : performance.now()) - this.#startTime;
+    return (this.isStopped ? this.#stopTime : performance.now()) - this.#startTime;
   }
 
   /**
@@ -156,7 +156,7 @@ class Animator {
    * @type {number}
    */
   get fps() {
-    return this.#stop === null ? 0.0 : 1000.0 / this.#timePerFrame;
+    return this.isStopped ? 0.0 : 1000.0 / this.#timePerFrame;
   }
 
   /**
@@ -164,6 +164,14 @@ class Animator {
    * @type {number}
    */
   get smoothedFps() {
-    return this.#stop === null ? 0.0 : 1000.0 / this.#smoothedTimePerFrame;
+    return this.isStopped ? 0.0 : 1000.0 / this.#smoothedTimePerFrame;
+  }
+
+  /**
+   * Get this animator is stopped.
+   * @type {boolean}
+   */
+  get isStopped() {
+    return this.#stop === null;
   }
 }
