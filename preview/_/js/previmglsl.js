@@ -12,6 +12,11 @@
    */
   let renderer = null;
   /**
+   * Header area.
+   * @type {HTMLDivElement}
+   */
+  let headerArea;
+  /**
    * Canvas.
    * @type {HTMLCanvasElement}
    */
@@ -43,6 +48,7 @@
   let animator = new Animator();
 
   window.addEventListener('load', () => {
+    headerArea = doc.getElementById('header');
     canvas = doc.getElementById('canvas');
     canvas.addEventListener('mousemove', e => {
       mx = e.offsetX / canvas.width;
@@ -60,8 +66,8 @@
   function render(now, t, st) {
     const time = animator.elapsedFromStart * 0.001;
 
-    const w = window.innerWidth;
-    const h = window.innerHeight;
+    const w = global.innerWidth;
+    const h = Math.max(0, global.innerHeight - headerArea.offsetHeight);
     canvas.width = w;
     canvas.height = h;
 
