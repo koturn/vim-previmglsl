@@ -36,12 +36,13 @@ class GlslQuadRenderer {
    * @param {HTMLCanvasElement} canvas Render target canvas.
    */
   constructor(canvas) {
-    this.#gl = canvas.getContext('webgl2')
+    const gl = canvas.getContext('webgl2')
       || canvas.getContext('webgl')
       || canvas.getContext('experimental-webgl');
-    if (this.#gl === null) {
+    if (gl === null) {
       throw new Error('WebGL 2.0 or WebGL is not supported.');
     }
+    this.#gl = gl;
     this.uniformLocations = new Array(3);
   }
 
@@ -55,22 +56,24 @@ class GlslQuadRenderer {
       vsText = fsText.match(/^\s*#\s*version\s+300\s+es/) === null ? GlslQuadRenderer.vsText100es : GlslQuadRenderer.vsText300es
     }
 
+    const gl = this.#gl;
+
     const program = this.#createProgram(
-      this.#createShaderFromText(vsText, this.#gl.VERTEX_SHADER),
-      this.#createShaderFromText(fsText, this.#gl.FRAGMENT_SHADER));
+      this.#createShaderFromText(vsText, gl.VERTEX_SHADER),
+      this.#createShaderFromText(fsText, gl.FRAGMENT_SHADER));
 
-    this.uniformLocations[0] = this.#gl.getUniformLocation(program, 'u_time');
-    this.uniformLocations[1] = this.#gl.getUniformLocation(program, 'u_mouse');
-    this.uniformLocations[2] = this.#gl.getUniformLocation(program, 'u_resolution');
+    this.uniformLocations[0] = gl.getUniformLocation(program, 'u_time');
+    this.uniformLocations[1] = gl.getUniformLocation(program, 'u_mouse');
+    this.uniformLocations[2] = gl.getUniformLocation(program, 'u_resolution');
 
-    const attribLocation = this.#gl.getAttribLocation(program, 'position');
-    this.#gl.bindBuffer(this.#gl.ARRAY_BUFFER, this.#createVbo(GlslQuadRenderer.#vertices));
-    this.#gl.enableVertexAttribArray(attribLocation);
-    this.#gl.vertexAttribPointer(attribLocation, 3, this.#gl.FLOAT, false, 0, 0);
+    const attribLocation = gl.getAttribLocation(program, 'position');
+    gl.bindBuffer(gl.ARRAY_BUFFER, this.#createVbo(GlslQuadRenderer.#vertices));
+    gl.enableVertexAttribArray(attribLocation);
+    gl.vertexAttribPointer(attribLocation, 3, gl.FLOAT, false, 0, 0);
 
-    this.#gl.bindBuffer(this.#gl.ELEMENT_ARRAY_BUFFER, this.#createIbo(GlslQuadRenderer.#triangles));
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.#createIbo(GlslQuadRenderer.#triangles));
 
-    this.#gl.clearColor(0.0, 0.0, 0.0, 1.0);
+    gl.clearColor(0.0, 0.0, 0.0, 1.0);
   }
 
   /**
@@ -82,16 +85,18 @@ class GlslQuadRenderer {
    * @param {number} height Height of viewport.
    */
   setUniforms(time, mx, my, width, height) {
-    this.#gl.uniform1f(this.uniformLocations[0], time);
-    this.#gl.uniform2fv(this.uniformLocations[1], [mx, my]);
-    this.#gl.uniform2fv(this.uniformLocations[2], [width, height]);
+    const gl = this.#gl;
+    gl.uniform1f(this.#uniformLocations[0], time);
+    gl.uniform2fv(this.#uniformLocations[1], [mx, my]);
+    gl.uniform2fv(this.#uniformLocations[2], [width, height]);
   }
 
   render(width, height) {
-    this.#gl.viewport(0, 0, width, height);
-    this.#gl.clear(this.#gl.COLOR_BUFFER_BIT);
-    this.#gl.drawElements(this.#gl.TRIANGLES, 6, this.#gl.UNSIGNED_SHORT, 0);
-    this.#gl.flush();
+    const gl = this.#gl;
+    gl.viewport(0, 0, width, height);
+    gl.clear(gl.COLOR_BUFFER_BIT);
+    gl.drawElements(gl.TRIANGLES, 6, gl.UNSIGNED_SHORT, 0);
+    gl.flush();
   }
 
   /**
@@ -101,12 +106,13 @@ class GlslQuadRenderer {
    * @return {WebGLShader} Created shader.
    */
   #createShaderFromText(text, shaderType) {
-    const shader = this.#gl.createShader(shaderType);
-    this.#gl.shaderSource(shader, text);
-    this.#gl.compileShader(shader);
+    const gl = this.#gl;
+    const shader = gl.createShader(shaderType);
+    gl.shaderSource(shader, text);
+    gl.compileShader(shader);
 
-    if (!this.#gl.getShaderParameter(shader, this.#gl.COMPILE_STATUS)) {
-      throw new Error(this.#gl.getShaderInfoLog(shader));
+    if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+      throw new Error(gl.getShaderInfoLog(shader));
     }
 
     return shader;
@@ -119,16 +125,17 @@ class GlslQuadRenderer {
    * @return {WebGLProgram,WebGL2Program} Created shader.
    */
   #createProgram(vs, fs) {
-    const program = this.#gl.createProgram();
-    this.#gl.attachShader(program, vs);
-    this.#gl.attachShader(program, fs);
-    this.#gl.linkProgram(program);
+    const gl = this.#gl;
+    const program = gl.createProgram();
+    gl.attachShader(program, vs);
+    gl.attachShader(program, fs);
+    gl.linkProgram(program);
 
-    if (!this.#gl.getProgramParameter(program, this.#gl.LINK_STATUS)) {
-      throw new Error(this.#gl.getProgramInfoLog(program));
+    if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+      throw new Error(gl.getProgramInfoLog(program));
     }
 
-    this.#gl.useProgram(program);
+    gl.useProgram(program);
     return program;
   }
 
@@ -138,10 +145,11 @@ class GlslQuadRenderer {
    * @return {WebGLBuffer} Created VBO.
    */
   #createVbo(vertices) {
-    const vbo = this.#gl.createBuffer();
-    this.#gl.bindBuffer(this.#gl.ARRAY_BUFFER, vbo);
-    this.#gl.bufferData(this.#gl.ARRAY_BUFFER, vertices, this.#gl.STATIC_DRAW);
-    this.#gl.bindBuffer(this.#gl.ARRAY_BUFFER, null);
+    const gl = this.#gl;
+    const vbo = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, vbo);
+    gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW);
+    gl.bindBuffer(gl.ARRAY_BUFFER, null);
     return vbo;
   }
 
@@ -151,10 +159,11 @@ class GlslQuadRenderer {
    * @return {WebGLBuffer} Created IBO.
    */
   #createIbo(triangles) {
-    const ibo = this.#gl.createBuffer();
-    this.#gl.bindBuffer(this.#gl.ELEMENT_ARRAY_BUFFER, ibo);
-    this.#gl.bufferData(this.#gl.ELEMENT_ARRAY_BUFFER, triangles, this.#gl.STATIC_DRAW);
-    this.#gl.bindBuffer(this.#gl.ELEMENT_ARRAY_BUFFER, null);
+    const gl = this.#gl;
+    const ibo = gl.createBuffer();
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, ibo);
+    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, triangles, gl.STATIC_DRAW);
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
     return ibo;
   }
 
