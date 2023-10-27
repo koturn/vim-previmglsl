@@ -37,7 +37,6 @@ class GlslQuadRenderer {
    */
   constructor(canvas) {
     this.#gl = canvas.getContext('webgl2')
-      || canvas.getContext('experimental-webgl2')
       || canvas.getContext('webgl')
       || canvas.getContext('experimental-webgl');
     if (this.#gl === null) {
