@@ -43,7 +43,7 @@ class GlslQuadRenderer {
       throw new Error('WebGL 2.0 or WebGL is not supported.');
     }
     this.#gl = gl;
-    this.uniformLocations = new Array(3);
+    this.#uniformLocations = new Array(3);
   }
 
   /**
@@ -62,9 +62,9 @@ class GlslQuadRenderer {
       this.#createShaderFromText(vsText, gl.VERTEX_SHADER),
       this.#createShaderFromText(fsText, gl.FRAGMENT_SHADER));
 
-    this.uniformLocations[0] = gl.getUniformLocation(program, 'u_time');
-    this.uniformLocations[1] = gl.getUniformLocation(program, 'u_mouse');
-    this.uniformLocations[2] = gl.getUniformLocation(program, 'u_resolution');
+    this.#uniformLocations[0] = gl.getUniformLocation(program, 'u_time');
+    this.#uniformLocations[1] = gl.getUniformLocation(program, 'u_mouse');
+    this.#uniformLocations[2] = gl.getUniformLocation(program, 'u_resolution');
 
     const attribLocation = gl.getAttribLocation(program, 'position');
     gl.bindBuffer(gl.ARRAY_BUFFER, this.#createVbo(GlslQuadRenderer.#vertices));
