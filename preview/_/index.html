@@ -12,7 +12,7 @@
   <script src="../_/js/previmglsl.js"></script>
 </head>
 <body>
-<div id="header">
+<header id="header">
   <div>
     <span id="file-name">Loading...</span>
     <small><span id="last-modified"></span></small>
@@ -28,9 +28,19 @@
       <span id="fps"></span>
     </span>
   </div>
-</div>
-<div id="preview"></div>
-<pre id="compiler-messages"></pre>
-<canvas id="canvas" width="512" height="512"></canvas>
+</header>
+
+<main>
+  <div id="preview"></div>
+  <pre id="compiler-messages"></pre>
+  <canvas id="canvas" width="512" height="512"></canvas>
+</main>
+
+<footer id="footer">
+  <div>
+    <span>Scale:</span>
+    <input id="scale" type="number" min="0.25" max="8" value="1"/>
+  </div>
+</footer>
 </body>
 </html>

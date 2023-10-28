@@ -13,9 +13,14 @@
   let renderer = null;
   /**
    * Header area.
-   * @type {HTMLDivElement}
+   * @type {HTMLHeaderElement}
    */
   let headerArea;
+  /**
+   * Footer area.
+   * @type {HTMLFooterElement}
+   */
+  let footerArea;
   /**
    * Canvas.
    * @type {HTMLCanvasElement}
@@ -47,6 +52,11 @@
    */
   let my = 0.0;
   /**
+   * Scale of canvas.
+   * @type {number}
+   */
+  let scale = 1.0;
+  /**
    * Animator.
    * @type {Animator}
    */
@@ -54,6 +64,7 @@
 
   window.addEventListener('load', () => {
     headerArea = doc.getElementById('header');
+    footerArea = doc.getElementById('footer');
     canvas = doc.getElementById('canvas');
     canvas.addEventListener('mousemove', e => {
       mx = e.offsetX / canvas.width;
@@ -67,6 +78,25 @@
         render();
       }
     }, true);
+
+    const scaleSelect = doc.getElementById('scale');
+    scale = parseFloat(scaleSelect.value);
+    scaleSelect.addEventListener('change', e => {
+      const target = e.target;
+      const value = parseFloat(target.value);
+      const min = parseFloat(target.min);
+      const max = parseFloat(target.max);
+
+      if (value < min) {
+        target.value = min;
+      } else if (value > max) {
+        target.value = max;
+      } else {
+        scale = value;
+        render();
+      }
+    }, true);
+
     global.addEventListener('resize', () => {
       render();
     }, true);
@@ -84,8 +114,9 @@
     const time = animator.totalElapsedTime * 0.001;
     elapsedTimeElement.innerText = time.toFixed(3);
 
-    const w = global.innerWidth;
-    const h = Math.max(0, global.innerHeight - headerArea.offsetHeight);
+    const w = global.innerWidth / scale;
+    const h = Math.max(0, global.innerHeight - headerArea.offsetHeight - footerArea.offsetHeight) / scale;
+
     canvas.width = w;
     canvas.height = h;
 
