@@ -15,6 +15,11 @@ class Animator {
    */
   #stopTime;
   /**
+   * High resolution timestamp for total elapsed time (in milliseconds).
+   * @type {number}
+   */
+  #totalElapsedTime;
+  /**
    * Elapsed time per one frame.
    * @type {number}
    */
@@ -37,6 +42,7 @@ class Animator {
     this.#startTime = 0.0;
     this.#stopTime = 0.0;
     this.#timePerFrame = 0.0;
+    this.#totalElapsedTime = 0.0;
     this.#smoothedTimePerFrame = 0.0;
     this.#stop = null;
   }
@@ -117,6 +123,17 @@ class Animator {
     this.#timePerFrame = 0.0;
     this.#smoothedTimePerFrame = 0.0;
     this.#stopTime = performance.now();
+    this.#totalElapsedTime += this.#stopTime - this.#startTime;
+  }
+
+  /**
+   * Reset #startTime, #stopTime and #totalElapsedTime.
+   */
+  reset() {
+    const now = performance.now();
+    this.#startTime = now;
+    this.#stopTime = now;
+    this.#totalElapsedTime = 0.0;
   }
 
   /**
@@ -133,6 +150,14 @@ class Animator {
    */
   get elapsedFromStart() {
     return (this.isStopped ? this.#stopTime : performance.now()) - this.#startTime;
+  }
+
+  /**
+   * Get total elapsed time which animation is worked (in milliseconds).
+   * @type {number}
+   */
+  get totalElapsedTime() {
+    return this.#totalElapsedTime + (this.isStopped ? 0.0 : performance.now() - this.#startTime);
   }
 
   /**

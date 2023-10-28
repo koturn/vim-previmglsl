@@ -81,7 +81,7 @@
    * Render created GLSL program.
    */
   function render(now, t, st) {
-    const time = animator.elapsedFromStart * 0.001;
+    const time = animator.totalElapsedTime * 0.001;
     elapsedTimeElement.innerText = time.toFixed(3);
 
     const w = global.innerWidth;
