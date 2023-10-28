@@ -11,6 +11,17 @@ body {
 canvas {
   display: block;
 }
+#header02 {
+  text-align: right;
+}
+#elapsed-area {
+  margin-left: 4px;
+  margin-right: 4px;
+}
+#fps-area {
+  margin-left: 4px;
+  margin-right: 4px;
+}
 #compiler-messages {
   color: red;
   background-color: black;

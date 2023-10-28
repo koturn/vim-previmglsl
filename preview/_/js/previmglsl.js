@@ -22,6 +22,11 @@
    */
   let canvas;
   /**
+   * Elapsed time area.
+   * @type {HTMLDivElement}
+   */
+  let elapsedTimeElement;
+  /**
    * Framerate area.
    * @type {HTMLDivElement}
    */
@@ -54,6 +59,7 @@
       mx = e.offsetX / canvas.width;
       my = e.offsetY / canvas.height;
     }, true);
+    elapsedTimeElement = doc.getElementById('elapsed-time');
     fpsElement = doc.getElementById('fps');
     compilerMessagesElement = doc.getElementById('compiler-messages');
     loadContentScript();
@@ -65,6 +71,7 @@
    */
   function render(now, t, st) {
     const time = animator.elapsedFromStart * 0.001;
+    elapsedTimeElement.innerText = time.toFixed(3);
 
     const w = global.innerWidth;
     const h = Math.max(0, global.innerHeight - headerArea.offsetHeight);
