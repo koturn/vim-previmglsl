@@ -59,6 +59,17 @@
       mx = e.offsetX / canvas.width;
       my = e.offsetY / canvas.height;
     }, true);
+    canvas.addEventListener('click', () => {
+      if (animator.isStopped) {
+        animator.start(render);
+      } else {
+        animator.stop();
+        render();
+      }
+    }, true);
+    global.addEventListener('resize', () => {
+      render();
+    }, true);
     elapsedTimeElement = doc.getElementById('elapsed-time');
     fpsElement = doc.getElementById('fps');
     compilerMessagesElement = doc.getElementById('compiler-messages');
