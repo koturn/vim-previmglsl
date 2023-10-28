@@ -53,6 +53,8 @@ class Animator {
    * @param {number | undefined}  Interval (milliseconds) to call the function. If null, use requestAnimation().
    */
   start(f, interval, smoothingSize) {
+    this.stop();
+
     if (typeof smoothingSize === 'undefined') {
       smoothingSize = 60;
     } else {
@@ -61,9 +63,6 @@ class Animator {
         throw new Error("smoothingSize must be greater or equal to 1");
       }
     }
-    this.#smoothedTimePerFrame = 0.0;
-
-    stop();
 
     this.#startTime = performance.now();
     this.#stopTime = this.#startTime;
@@ -103,7 +102,7 @@ class Animator {
 
         this.#smoothedTimePerFrame = updateSmoothedTimePerFrame(this.#smoothedTimePerFrame, this.#timePerFrame);
 
-        f(now(), this.#timePerFrame, this.#smoothedTimePerFrame);
+        f(now, this.#timePerFrame, this.#smoothedTimePerFrame);
       }, interval);
       this.#stop = () => clearInterval(id);
     }

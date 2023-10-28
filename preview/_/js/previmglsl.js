@@ -37,6 +37,21 @@
    */
   let fpsElement;
   /**
+   * Checkbox to switch VSync.
+   * @type {HTMLInputElement}
+   */
+  let vsyncCheckBox;
+  /**
+   * Target FPS label.
+   * @type {HTMLSpanElement}
+   */
+  let targetFpsLabel;
+  /**
+   * Target FPS input.
+   * @type {HTMLInputElement}
+   */
+  let targetFps;
+  /**
    * Comiler messages area.
    * @type {HTMLPreElement}
    */
@@ -72,9 +87,9 @@
     }, true);
     canvas.addEventListener('click', () => {
       if (animator.isStopped) {
-        animator.start(render);
+        start();
       } else {
-        animator.stop();
+        stop();
         render();
       }
     }, true);
@@ -97,6 +112,40 @@
       }
     }, true);
 
+    targetFpsLabel = doc.getElementById('target-fps-label');
+    targetFps = doc.getElementById('target-fps');
+    targetFps.addEventListener('change', e => {
+      const target = e.target;
+      const value = parseFloat(target.value);
+      const min = parseFloat(target.min);
+      const max = parseFloat(target.max);
+
+      if (value < min) {
+        target.value = min;
+      } else if (value > max) {
+        target.value = max;
+      } else if (!animator.isStopped) {
+        start();
+      }
+    });
+
+    vsyncCheckBox = doc.getElementById('vsync-checkbox');
+    vsyncCheckBox.addEventListener('change', e => {
+      const target = e.target;
+
+      if (target.checked) {
+        targetFpsLabel.style.color = "#000000";
+        targetFps.disabled = true;
+      } else {
+        targetFpsLabel.style.color = "#808080";
+        targetFps.disabled = false;
+      }
+
+      if (!animator.isStopped) {
+        start();
+      }
+    }, true);
+
     global.addEventListener('resize', () => {
       render();
     }, true);
@@ -106,6 +155,27 @@
     loadContentScript();
     global.setInterval(loadContentScript, 1000);
   });
+
+  /**
+   * Start animation.
+   */
+  function start() {
+    if (vsyncCheckBox.checked) {
+      console.log('Start animation: VSync');
+      animator.start(render);
+    } else {
+      const interval = 1000.0 / parseFloat(targetFps.value);
+      console.log('Start animation: Interval: ' + interval + ' msec');
+      animator.start(render, interval);
+    }
+  }
+
+  /**
+   * Stop animation.
+   */
+  function stop() {
+    animator.stop();
+  }
 
   /**
    * Render created GLSL program.
@@ -163,7 +233,7 @@
           elapsed => console.log('Build success: ' + new Date() + ', elapsed: ' + elapsed.toFixed(3) + ' msec'),
           elapsed => console.error('Build failed: ' + new Date() + ', elapsed: ' + elapsed.toFixed(3) + ' msec'));
 
-        animator.start(render);
+        start();
         canvas.style.display = '';
         compilerMessagesElement.innerText = '';
       } catch (e) {
@@ -198,13 +268,13 @@
    * @param {function(number)} onFailure Callback function on failure.
    */
   function measureTime(f, onSuccess, onFailure) {
-    const start = performance.now();
+    const startTime = performance.now();
     try {
       f();
       const t1 = performance.now();
-      onSuccess(performance.now() - start);
+      onSuccess(performance.now() - startTime);
     } catch (e) {
-      onFailure(performance.now() - start);
+      onFailure(performance.now() - startTime);
       throw e;
     }
   }
