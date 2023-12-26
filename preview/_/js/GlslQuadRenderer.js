@@ -40,6 +40,31 @@ class GlslQuadRenderer {
    * @type {WebGLShader}
    */
   #defaultVs300es = null;
+  /**
+   * WebGL extension of EXT_disjoint_timer_query or EXT_disjoint_timer_query_webgl2.
+   * @type {Object}
+   */
+  #extDisjointTimerQuery;
+  /**
+   * Begin measuring frametime.
+   * @type {function(): object}
+   */
+  #beginMeasurement;
+  /**
+   * End measuring frametime.
+   * @type {function(Object)}
+   */
+  #endMeasurement;
+  /**
+   * Update sum of frametime for moving average.
+   * @type {function()}
+   */
+  #updateFrametime;
+  /**
+   * Retrieve moving average value of frametime.
+   * @type {function(): number}
+   */
+  #retrieveFrametime;
 
   /**
    * Create WebGL/WebGL2 context from specified canvas.
@@ -54,6 +79,10 @@ class GlslQuadRenderer {
     }
     this.#gl = gl;
     this.#uniformLocations = new Array(3);
+
+    this.#extDisjointTimerQuery = gl.getExtension('EXT_disjoint_timer_query_webgl2')
+      || gl.getExtension('EXT_disjoint_timer_query');
+    this.disableMeasureFrametime();
   }
 
   /**
@@ -100,12 +129,151 @@ class GlslQuadRenderer {
     gl.uniform2fv(this.#uniformLocations[2], [width, height]);
   }
 
+  /**
+   * Render one frame.
+   * @param {number} width Width of viewport.
+   * @param {number} height Height of viewport.
+   */
   render(width, height) {
     const gl = this.#gl;
+
+    const query = this.#beginMeasurement();
+
     gl.viewport(0, 0, width, height);
     gl.clear(gl.COLOR_BUFFER_BIT);
     gl.drawElements(gl.TRIANGLES, 6, gl.UNSIGNED_SHORT, 0);
     gl.flush();
+
+    this.#endMeasurement(query);
+    this.#updateFrametime();
+  }
+
+  /**
+   * Enable measuring frametime.
+   * @param {number} size Window size of moving average for frametime.
+   * @return {boolean} True if frametime measurement is available, otherwise false.
+   */
+  enableMeasureFrametime(size) {
+    if (this.#extDisjointTimerQuery === null) {
+      return false;
+    }
+
+    const usingList = [];
+    const availableList = [];
+
+    size = typeof size !== 'undefined' ? size : 60;
+    let count = 0;
+    let index = 0;
+    let sum = 0;
+    const dataArray = new Float64Array(size);
+    const append = value => {
+      index++;
+      if (count < dataArray.length) {
+        dataArray[index] = value;
+        sum += value;
+        count++;
+      } else {
+        if (index >= dataArray.length) {
+          index -= dataArray.length;
+        }
+        const oldValue = dataArray[index];
+        dataArray[index] = value;
+        sum += value - oldValue;
+      }
+    };
+
+    this.#retrieveFrametime = () => count === 0 ? 0 : sum / count;
+
+    if (this.#extDisjointTimerQuery.toString() === '[object EXTDisjointTimerQueryWebGL2]') {
+      this.#beginMeasurement = () => {
+        const availableQuery = availableList.length ? availableList.shift() : this.#gl.createQuery();
+        this.#gl.beginQuery(this.#extDisjointTimerQuery.TIME_ELAPSED_EXT, availableQuery);
+        return availableQuery;
+      };
+
+      this.#endMeasurement = query => {
+        this.#gl.endQuery(this.#extDisjointTimerQuery.TIME_ELAPSED_EXT, query);
+        usingList.push(query);
+      };
+
+      this.#updateFrametime = () => {
+        const gl = this.#gl;
+
+        if (gl.getParameter(this.#extDisjointTimerQuery.GPU_DISJOINT_EXT)) {
+          usingList.forEach(query => gl.deleteQuery(query));
+          return;
+        }
+
+        for (let usingQuery = usingList[0]; typeof usingQuery !== 'undefined'; usingQuery = usingList[0]) {
+          if (!gl.getQueryParameter(usingQuery, gl.QUERY_RESULT_AVAILABLE)) {
+            break;
+          }
+
+          const result = gl.getQueryParameter(usingQuery, gl.QUERY_RESULT);
+          availableList.push(usingList.shift());
+          append(result);
+
+          usingList.shift();
+        }
+      };
+    } else {
+      this.#beginMeasurement = () => {
+        const ext = this.#extDisjointTimerQuery;
+        const availableQuery = availableList.length ? availableList.shift() : ext.createQueryEXT();
+        ext.beginQueryEXT(ext.TIME_ELAPSED_EXT, availableQuery);
+        return availableQuery;
+      };
+
+      this.#endMeasurement = query => {
+        if (query === null) {
+          return;
+        }
+        const ext = this.#extDisjointTimerQuery;
+        ext.endQueryEXT(ext.TIME_ELAPSED_EXT, query);
+        usingList.push(query);
+      };
+
+      this.#updateFrametime = () => {
+        const ext = this.#extDisjointTimerQuery;
+
+        if (this.#gl.getParameter(ext.GPU_DISJOINT_EXT)) {
+          usingList.forEach(query => ext.deleteQueryEXT(query));
+          return;
+        }
+
+        for (let usingQuery = usingList[0]; typeof usingQuery !== 'undefined'; usingQuery = usingList[0]) {
+          if (!ext.getQueryObjectEXT(usingQuery, ext.QUERY_RESULT_AVAILABLE_EXT)) {
+            break;
+          }
+
+          const result = ext.getQueryObjectEXT(usingQuery, ext.QUERY_RESULT_EXT);
+          availableList.push(usingList.shift());
+          append(result);
+
+          usingList.shift();
+        }
+      };
+    }
+
+    return true;
+  }
+
+  /**
+   * Disable measuring frametime.
+   */
+  disableMeasureFrametime() {
+    this.#beginMeasurement = () => null;
+    this.#endMeasurement = query => {};
+    this.#updateFrametime = () => {};
+    this.#retrieveFrametime = () => -1;
+  }
+
+  /**
+   * Get smoothed frametime.
+   * @return {number} Frametime in nanoseconds.
+   */
+  getFrameTime() {
+    return this.#retrieveFrametime();
   }
 
   /**

@@ -220,6 +220,30 @@ class WgslQuadRenderer {
   }
 
   /**
+   * Enable measuring frametime (not supported).
+   * @param {number} size Window size of moving average for frametime.
+   * @return {boolean} True if frametime measurement is available, otherwise false.
+   */
+  enableMeasureFrametime(size) {
+    return false;
+  }
+
+  /**
+   * Disable measuring frametime (not supported).
+   */
+  disableMeasureFrametime() {
+    // Do nothing
+  }
+
+  /**
+   * Get smoothed frametime (not supported).
+   * @return {number} Frametime in nanoseconds.
+   */
+  getFrameTime() {
+    return -1;
+  }
+
+  /**
    * Create instance of this class.
    * @param {HTMLCanvasElement} canvas Render target canvas.
    * @return {WgslQuadRenderer} Instance of this class.

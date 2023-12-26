@@ -24,6 +24,10 @@ canvas {
   margin-left: 4px;
   margin-right: 4px;
 }
+#frametime-area {
+  margin-left: 4px;
+  margin-right: 4px;
+}
 #compiler-messages {
   color: red;
   background-color: black;

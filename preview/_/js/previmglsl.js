@@ -37,6 +37,11 @@
    */
   let fpsElement;
   /**
+   * Frametime area.
+   * @type {HTMLDivElement}
+   */
+  let frametimeElement;
+  /**
    * Checkbox to switch VSync.
    * @type {HTMLInputElement}
    */
@@ -151,6 +156,7 @@
     }, true);
     elapsedTimeElement = doc.getElementById('elapsed-time');
     fpsElement = doc.getElementById('fps');
+    frametimeElement = doc.getElementById('frametime');
     compilerMessagesElement = doc.getElementById('compiler-messages');
     loadContentScript();
     global.setInterval(loadContentScript, 1000);
@@ -192,6 +198,10 @@
 
     renderer.setUniforms(time, mx, my, w, h);
     renderer.render(w, h);
+
+    if (frametimeElement !== null) {
+      frametimeElement.innerText = (renderer.getFrameTime() / 1000000.0).toFixed(3);
+    }
   }
 
   /**
@@ -224,6 +234,11 @@
             renderer = new GlslQuadRenderer(canvas);
           } else {
             renderer = await WgslQuadRenderer.create(canvas);
+          }
+          if (!renderer.enableMeasureFrametime()) {
+            frametimeElement.remove();
+            frametimeElement = null;
+            doc.getElementById('frametime-area').remove();
           }
         }
 
