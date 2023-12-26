@@ -7,6 +7,11 @@
    */
   const doc = global.document;
   /**
+   * Animator.
+   * @type {Animator}
+   */
+  const animator = new Animator();
+  /**
    * GLSL renderer.
    * @type {GlslQuadRenderer}
    */
@@ -81,13 +86,8 @@
    * @type {number}
    */
   let scale = 1.0;
-  /**
-   * Animator.
-   * @type {Animator}
-   */
-  let animator = new Animator();
 
-  window.addEventListener('load', () => {
+  global.addEventListener('load', () => {
     headerArea = doc.getElementById('header');
     footerArea = doc.getElementById('footer');
     canvas = doc.getElementById('canvas');
@@ -105,7 +105,7 @@
     }, true);
 
     const scaleSelect = doc.getElementById('scale');
-    scale = parseFloat(scaleSelect.value);
+    scale = Number.parseFloat(scaleSelect.value);
     scaleSelect.addEventListener('change', e => {
       const target = e.target;
       if (clampNumberInput(target)) {
@@ -154,9 +154,7 @@
       }
     }, true);
 
-    global.addEventListener('resize', () => {
-      render();
-    }, true);
+    global.addEventListener('resize', render, true);
     elapsedTimeElement = doc.getElementById('elapsed-time');
     fpsElement = doc.getElementById('fps');
     frametimeElement = doc.getElementById('frametime');
@@ -203,7 +201,7 @@
       console.log('Start animation: VSync');
       animator.start(render);
     } else {
-      const interval = 1000.0 / parseFloat(targetFps.value);
+      const interval = 1000.0 / Number.parseFloat(targetFps.value);
       console.log('Start animation: Interval: ' + interval + ' msec');
       animator.start(render, interval);
     }
