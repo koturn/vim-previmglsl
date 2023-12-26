@@ -125,8 +125,8 @@ class GlslQuadRenderer {
   setUniforms(time, mx, my, width, height) {
     const gl = this.#gl;
     gl.uniform1f(this.#uniformLocations[0], time);
-    gl.uniform2fv(this.#uniformLocations[1], [mx, my]);
-    gl.uniform2fv(this.#uniformLocations[2], [width, height]);
+    gl.uniform2f(this.#uniformLocations[1], mx, my);
+    gl.uniform2f(this.#uniformLocations[2], width, height);
   }
 
   /**
