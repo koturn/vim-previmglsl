@@ -218,6 +218,7 @@
     if (needReload && (typeof getContent === 'function') && (typeof getFileType === 'function')) {
       const fsText = getContent();
       try {
+        const isFirstBuild = renderer === null;
         if (renderer === null) {
           if (getFileType() === 'glsl') {
             renderer = new GlslQuadRenderer(canvas);
@@ -226,6 +227,7 @@
           }
         }
 
+        const isStopped = animator.isStopped;
         animator.stop();
 
         measureTime(
@@ -233,7 +235,12 @@
           elapsed => console.log('Build success: ' + new Date() + ', elapsed: ' + elapsed.toFixed(3) + ' msec'),
           elapsed => console.error('Build failed: ' + new Date() + ', elapsed: ' + elapsed.toFixed(3) + ' msec'));
 
-        start();
+        if (isFirstBuild || !isStopped) {
+          start();
+        } else {
+          render();
+        }
+
         canvas.style.display = '';
         compilerMessagesElement.innerText = '';
       } catch (e) {
