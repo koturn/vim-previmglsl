@@ -108,33 +108,20 @@
     scale = parseFloat(scaleSelect.value);
     scaleSelect.addEventListener('change', e => {
       const target = e.target;
-      const value = parseFloat(target.value);
-      const min = parseFloat(target.min);
-      const max = parseFloat(target.max);
-
-      if (value < min) {
-        target.value = min;
-      } else if (value > max) {
-        target.value = max;
-      } else {
-        scale = value;
-        render();
+      if (clampNumberInput(target)) {
+        return;
       }
+      scale = target.value;
+      render();
     }, true);
 
     targetFpsLabel = doc.getElementById('target-fps-label');
     targetFps = doc.getElementById('target-fps');
     targetFps.addEventListener('change', e => {
-      const target = e.target;
-      const value = parseFloat(target.value);
-      const min = parseFloat(target.min);
-      const max = parseFloat(target.max);
-
-      if (value < min) {
-        target.value = min;
-      } else if (value > max) {
-        target.value = max;
-      } else if (!animator.isStopped) {
+      if (clampNumberInput(e.target)) {
+        return;
+      }
+      if (!animator.isStopped) {
         start();
       }
     });
@@ -178,6 +165,35 @@
     loadContentScript();
     global.setInterval(loadContentScript, 1000);
   });
+
+  /**
+   * Clamp value of number input.
+   * @param {HTMLInputElement} numberInput Number input element.
+   * @param {number} min Minimum value for numberInput. (optional)
+   * @param {number} max maximum value for numberInput. (optional)
+   * @return True if value of number input is clamped, otherwise false.
+   */
+  function clampNumberInput(numberInput, min, max) {
+    if (typeof min === 'undefined') {
+      min = Number.parseFloat(numberInput.min);
+    }
+    if (typeof max === 'undefined') {
+      max = Number.parseFloat(numberInput.max);
+    }
+
+    const value = Number.parseFloat(numberInput.value);
+    if (value < min) {
+      // Fire change event.
+      numberInput.value = min;
+      return true;
+    } else if (value > max) {
+      // Fire change event.
+      numberInput.value = max;
+      return true;
+    } else {
+      return false;
+    }
+  }
 
   /**
    * Start animation.
