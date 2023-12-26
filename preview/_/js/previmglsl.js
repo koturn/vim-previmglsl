@@ -27,7 +27,7 @@
    */
   let canvas;
   /**
-   * Elapsed time area.
+   * Elapsed time value area.
    * @type {HTMLDivElement}
    */
   let elapsedTimeElement;
@@ -37,10 +37,15 @@
    */
   let fpsElement;
   /**
-   * Frametime area.
+   * Frametime value area.
    * @type {HTMLDivElement}
    */
   let frametimeElement;
+  /**
+   * Frametime area.
+   * @type {HTMLSpanElement}
+   */
+  let frametimeAreaElement;
   /**
    * Checkbox to switch VSync.
    * @type {HTMLInputElement}
@@ -151,12 +156,24 @@
       }
     }, true);
 
+    const frametimeCheckBox = doc.getElementById('frametime-checkbox');
+    frametimeCheckBox.addEventListener('change', e => {
+      if (e.target.checked) {
+        renderer.enableMeasureFrametime();
+        frametimeAreaElement.style.display = '';
+      } else {
+        renderer.disableMeasureFrametime();
+        frametimeAreaElement.style.display = 'none';
+      }
+    }, true);
+
     global.addEventListener('resize', () => {
       render();
     }, true);
     elapsedTimeElement = doc.getElementById('elapsed-time');
     fpsElement = doc.getElementById('fps');
     frametimeElement = doc.getElementById('frametime');
+    frametimeAreaElement = doc.getElementById('frametime-area');
     compilerMessagesElement = doc.getElementById('compiler-messages');
     loadContentScript();
     global.setInterval(loadContentScript, 1000);
@@ -238,7 +255,11 @@
           if (!renderer.enableMeasureFrametime()) {
             frametimeElement.remove();
             frametimeElement = null;
+            frametimeAreaElement.remove();
+            frametimeAreaElement = null;
             doc.getElementById('frametime-area').remove();
+            doc.getElementById('frametime-checkbox').remove();
+            doc.getElementById('frametime-checkbox-label').remove();
           }
         }
 
