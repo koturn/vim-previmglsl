@@ -30,6 +30,16 @@ class GlslQuadRenderer {
    * @type {Array}
    */
   #uniformLocations;
+  /**
+   * Cached compiled default GLSL ES 1.0 vertex shader.
+   * @type {WebGLShader}
+   */
+  #defaultVs100es = null;
+  /**
+   * Cached compiled default GLSL ES 3.0 vertex shader.
+   * @type {WebGLShader}
+   */
+  #defaultVs300es = null;
 
   /**
    * Create WebGL/WebGL2 context from specified canvas.
@@ -52,15 +62,14 @@ class GlslQuadRenderer {
    * @param {string} vsText Vertex shader source code (optional).
    */
   build(fsText, vsText) {
-    if (typeof vsText === 'undefined') {
-      vsText = fsText.match(/^\s*#\s*version\s+300\s+es/) === null ? GlslQuadRenderer.vsText100es : GlslQuadRenderer.vsText300es
-    }
-
     const gl = this.#gl;
 
-    const program = this.#createProgram(
-      this.#createShaderFromText(vsText, gl.VERTEX_SHADER),
-      this.#createShaderFromText(fsText, gl.FRAGMENT_SHADER));
+    const vs = typeof vsText !== 'undefined' ? this.#createShaderFromText(vsText, gl.VERTEX_SHADER)
+      : fsText.match(/^\s*#\s*version\s+300\s+es/) === null ? this.#getVertexShader100es()
+      : this.#getVertexShader300es();
+    const fs = this.#createShaderFromText(fsText, gl.FRAGMENT_SHADER);
+
+    const program = this.#createProgram(vs, fs);
 
     this.#uniformLocations[0] = gl.getUniformLocation(program, 'u_time');
     this.#uniformLocations[1] = gl.getUniformLocation(program, 'u_mouse');
@@ -97,6 +106,28 @@ class GlslQuadRenderer {
     gl.clear(gl.COLOR_BUFFER_BIT);
     gl.drawElements(gl.TRIANGLES, 6, gl.UNSIGNED_SHORT, 0);
     gl.flush();
+  }
+
+  /**
+   * Get default GLSL ES 1.0 vertex shader.
+   * @return {WebGLShader} Created vertex shader.
+   */
+  #getVertexShader100es() {
+    if (this.#defaultVs100es === null) {
+      this.#defaultVs100es = this.#createShaderFromText(GlslQuadRenderer.vsText100es, this.#gl.VERTEX_SHADER);
+    }
+    return this.#defaultVs100es;
+  }
+
+  /**
+   * Get default GLSL ES 3.0 vertex shader.
+   * @return {WebGLShader} Created vertex shader.
+   */
+  #getVertexShader300es() {
+    if (this.#defaultVs300es === null) {
+      this.#defaultVs300es = this.#createShaderFromText(GlslQuadRenderer.vsText300es, this.#gl.VERTEX_SHADER);
+    }
+    return this.#defaultVs300es;
   }
 
   /**
