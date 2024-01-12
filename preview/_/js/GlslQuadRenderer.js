@@ -315,7 +315,7 @@ class GlslQuadRenderer {
    * Get smoothed frametime.
    * @return {number} Frametime in nanoseconds.
    */
-  getFrameTime() {
+  get frametime() {
     return this.#retrieveFrametime();
   }
 

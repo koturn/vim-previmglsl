@@ -284,7 +284,7 @@
     renderer.render(w, h);
 
     if (frametimeElement !== null) {
-      frametimeElement.innerText = (renderer.getFrameTime() / 1000000.0).toFixed(3);
+      frametimeElement.innerText = (renderer.frametime / 1000000.0).toFixed(3);
     }
   }
 

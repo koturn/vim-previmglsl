@@ -239,7 +239,7 @@ class WgslQuadRenderer {
    * Get smoothed frametime (not supported).
    * @return {number} Frametime in nanoseconds.
    */
-  getFrameTime() {
+  get frametime() {
     return -1;
   }
 
