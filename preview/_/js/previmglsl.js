@@ -316,8 +316,10 @@
         if (renderer === null) {
           if (getFileType() === 'glsl') {
             renderer = new GlslQuadRenderer(canvas);
+            doc.title = 'GLSL Preview';
           } else {
             renderer = await WgslQuadRenderer.create(canvas);
+            doc.title = 'WLSL Preview';
           }
           if (!renderer.enableMeasureFrametime()) {
             frametimeElement.remove();
