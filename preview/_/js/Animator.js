@@ -190,7 +190,7 @@ class Animator {
    * @type {number}
    */
   get fps() {
-    return this.isStopped ? 0.0 : 1000.0 / this.#timePerFrame;
+    return (this.isStopped || this.#timePerFrame === 0) ? 0.0 : 1000.0 / this.#timePerFrame;
   }
 
   /**
@@ -198,7 +198,7 @@ class Animator {
    * @type {number}
    */
   get smoothedFps() {
-    return this.isStopped ? 0.0 : 1000.0 / this.#smoothedTimePerFrame;
+    return (this.isStopped || this.#smoothedTimePerFrame === 0) ? 0.0 : 1000.0 / this.#smoothedTimePerFrame;
   }
 
   /**
