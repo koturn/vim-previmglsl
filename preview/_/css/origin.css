@@ -31,4 +31,7 @@ canvas {
 #compiler-messages {
   color: red;
   background-color: black;
+  overflow: auto;
+  width: 100%;
+  resize: none;
 }

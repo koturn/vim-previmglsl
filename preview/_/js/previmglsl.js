@@ -68,9 +68,9 @@
   let targetFps;
   /**
    * Comiler messages area.
-   * @type {HTMLPreElement}
+   * @type {HTMLTextAreaElement}
    */
-  let compilerMessagesElement;
+  let compilerMessagesTextArea;
   /**
    * Mouse move offset of X.
    * @type {number}
@@ -159,7 +159,7 @@
     fpsElement = doc.getElementById('fps');
     frametimeElement = doc.getElementById('frametime');
     frametimeAreaElement = doc.getElementById('frametime-area');
-    compilerMessagesElement = doc.getElementById('compiler-messages');
+    compilerMessagesTextArea = doc.getElementById('compiler-messages');
     loadContentScript();
     global.setInterval(loadContentScript, 1000);
   });
@@ -292,11 +292,13 @@
         }
 
         canvas.style.display = '';
-        compilerMessagesElement.innerText = '';
+        compilerMessagesTextArea.value = '';
+        compilerMessagesTextArea.style.display = 'none';
       } catch (e) {
         console.error(e);
         canvas.style.display = 'none';
-        compilerMessagesElement.innerText = e.message;
+        compilerMessagesTextArea.value = e.message;
+        compilerMessagesTextArea.style.display = '';
       }
     }
 
