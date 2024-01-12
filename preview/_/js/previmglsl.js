@@ -152,9 +152,10 @@
         renderer.disableMeasureFrametime();
         frametimeAreaElement.style.display = 'none';
       }
+      resizeContent();
     }, true);
 
-    global.addEventListener('resize', render, true);
+    global.addEventListener('resize', resizeContent, true);
     elapsedTimeElement = doc.getElementById('elapsed-time');
     fpsElement = doc.getElementById('fps');
     frametimeElement = doc.getElementById('frametime');
@@ -215,17 +216,25 @@
   }
 
   /**
+   * Resize canvas.
+   */
+  function resizeContent() {
+    const w = global.innerWidth / scale;
+    const h = Math.max(0, global.innerHeight - headerArea.offsetHeight - footerArea.offsetHeight) / scale;
+    canvas.width = w;
+    canvas.height = h;
+    render();
+  }
+
+  /**
    * Render created GLSL program.
    */
   function render(now, t, st) {
     const time = animator.totalElapsedTime * 0.001;
     elapsedTimeElement.innerText = time.toFixed(3);
 
-    const w = global.innerWidth / scale;
-    const h = Math.max(0, global.innerHeight - headerArea.offsetHeight - footerArea.offsetHeight) / scale;
-
-    canvas.width = w;
-    canvas.height = h;
+    const w = canvas.width;
+    const h = canvas.height;
 
     renderer.setUniforms(time, mx, my, w, h);
     renderer.render(w, h);
@@ -300,6 +309,10 @@
         compilerMessagesTextArea.value = e.message;
         compilerMessagesTextArea.style.display = '';
       }
+    }
+
+    if (needReload) {
+      resizeContent();
     }
 
     return 0;
