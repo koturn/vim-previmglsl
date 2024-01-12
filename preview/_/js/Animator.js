@@ -68,16 +68,26 @@ class Animator {
     this.#stopTime = this.#startTime;
     let prevTime = this.#startTime;
 
-    let smoothingCount = 0;
-    const updateSmoothedTimePerFrame = (smoothedTimePerFrame, timePerFrame) => {
-      if (smoothingCount < smoothingSize) {
-        let prevCnt = smoothingCount;
-        smoothingCount++;
-        return smoothedTimePerFrame * (prevCnt / smoothingCount) + (timePerFrame / smoothingCount);
+    let count = 0;
+    let index = 0;
+    let sum = 0;
+    const dataArray = new Float64Array(smoothingSize);
+    const updateSmoothedTimePerFrame = value => {
+      index++;
+      if (count < dataArray.length) {
+        dataArray[index] = value;
+        sum += value;
+        count++;
       } else {
-        return smoothedTimePerFrame + (timePerFrame - smoothedTimePerFrame) / smoothingCount;
+        if (index >= dataArray.length) {
+          index -= dataArray.length;
+        }
+        const oldValue = dataArray[index];
+        dataArray[index] = value;
+        sum += value - oldValue;
       }
-    }
+      return count === 0 ? 0 : sum / count;
+    };
 
     f(prevTime, 0.0, 0.0);
     if (typeof interval === 'undefined') {
@@ -85,7 +95,7 @@ class Animator {
         this.#timePerFrame = now - prevTime;
         prevTime = now;
 
-        this.#smoothedTimePerFrame = updateSmoothedTimePerFrame(this.#smoothedTimePerFrame, this.#timePerFrame);
+        this.#smoothedTimePerFrame = updateSmoothedTimePerFrame(this.#timePerFrame);
 
         f(now, this.#timePerFrame, this.#smoothedTimePerFrame);
 
@@ -100,7 +110,7 @@ class Animator {
         this.#timePerFrame = now - prevTime;
         prevTime = now;
 
-        this.#smoothedTimePerFrame = updateSmoothedTimePerFrame(this.#smoothedTimePerFrame, this.#timePerFrame);
+        this.#smoothedTimePerFrame = updateSmoothedTimePerFrame(this.#timePerFrame);
 
         f(now, this.#timePerFrame, this.#smoothedTimePerFrame);
       }, interval);
