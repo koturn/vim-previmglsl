@@ -274,6 +274,10 @@
    * Render created GLSL program.
    */
   function render(now, t, st) {
+    if (!renderer.hasBuilt) {
+      return;
+    }
+
     const time = animator.totalElapsedTime * 0.001;
     elapsedTimeElement.innerText = time.toFixed(3);
 

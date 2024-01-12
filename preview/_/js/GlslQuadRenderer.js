@@ -31,6 +31,11 @@ class GlslQuadRenderer {
    */
   #uniformLocations;
   /**
+   * A flag whether shader has been already built or not.
+   * @type {boolean}
+   */
+  #hasBuilt;
+  /**
    * Cached compiled default GLSL ES 1.0 vertex shader.
    * @type {WebGLShader}
    */
@@ -104,6 +109,7 @@ class GlslQuadRenderer {
     }
     this.#gl = gl;
     this.#uniformLocations = new Array(3);
+    this.#hasBuilt = false;
 
     this.#vertexShader = null;
     this.#translatedVsSource = null;
@@ -127,6 +133,7 @@ class GlslQuadRenderer {
     this.#translatedVsSource = null;
     this.#fragmentShader = null;
     this.#translatedFsSource = null;
+    this.#hasBuilt = false;
 
     const vs = typeof vsText !== 'undefined' ? this.#createShaderFromText(vsText, gl.VERTEX_SHADER)
       : fsText.match(/^\s*#\s*version\s+300\s+es/) === null ? this.#getVertexShader100es()
@@ -152,6 +159,7 @@ class GlslQuadRenderer {
 
     gl.clearColor(0.0, 0.0, 0.0, 1.0);
 
+    this.#hasBuilt = true;
     if (this.#extDebugShader !== null) {
       this.#fragmentShader = fs;
     }
@@ -309,6 +317,14 @@ class GlslQuadRenderer {
     this.#endMeasurement = query => {};
     this.#updateFrametime = () => {};
     this.#retrieveFrametime = () => -1;
+  }
+
+  /**
+   * Get a flag whether shader has been already built or not.
+   * @return {boolean} True if shader has been already built, otherwise false.
+   */
+  get hasBuilt() {
+    return this.#hasBuilt;
   }
 
   /**

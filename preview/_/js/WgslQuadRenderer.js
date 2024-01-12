@@ -66,6 +66,11 @@ class WgslQuadRenderer {
    * @type {Float32Array}
    */
   #uniformDataArray;
+  /**
+   * A flag whether shader has been already built or not.
+   * @type {boolean}
+   */
+  #hasBuilt;
 
   /**
    * Create WebGPU context from specified canvas.
@@ -109,6 +114,8 @@ class WgslQuadRenderer {
     this.#uniformBuffer = uniformBuffer;
 
     this.#uniformDataArray = new Float32Array(6);
+
+    this.#hasBuilt = false;
   }
 
   /**
@@ -120,6 +127,8 @@ class WgslQuadRenderer {
     if (typeof vsText === 'undefined') {
       vsText = WgslQuadRenderer.vsDefaultText;
     }
+
+    this.#hasBuilt = false;
 
     this.#pipeline = this.#device.createRenderPipeline({
       layout: 'auto',
@@ -168,6 +177,8 @@ class WgslQuadRenderer {
         }
       ]
     });
+
+    this.#hasBuilt = true;
   }
 
   /**
@@ -233,6 +244,14 @@ class WgslQuadRenderer {
    */
   disableMeasureFrametime() {
     // Do nothing
+  }
+
+  /**
+   * Get a flag whether shader has been already built or not.
+   * @return {boolean} True if shader has been already built, otherwise false.
+   */
+  get hasBuilt() {
+    return this.#hasBuilt;
   }
 
   /**
