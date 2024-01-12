@@ -72,6 +72,21 @@
    */
   let compilerMessagesTextArea;
   /**
+   * <span> to show tabs.
+   * @type {HTMLSpanElement}
+   */
+  let tabAreaSpan;
+  /**
+   * <textarea> to show translated vertex shader source.
+   * @type {HTMLTextAreaElement}
+   */
+  let transVertTextArea;
+  /**
+   * <textarea> to show translated fragment shader source.
+   * @type {HTMLTextAreaElement}
+   */
+  let transFragTextArea;
+  /**
    * Mouse move offset of X.
    * @type {number}
    */
@@ -161,6 +176,29 @@
     frametimeElement = doc.getElementById('frametime');
     frametimeAreaElement = doc.getElementById('frametime-area');
     compilerMessagesTextArea = doc.getElementById('compiler-messages');
+
+    tabAreaSpan = doc.getElementById('tab-area');
+
+    transVertTextArea = doc.getElementById('trans-vert');
+    const transVertRadioButton = doc.getElementById('tab-trans-vert');
+    if (transVertRadioButton !== null) {
+      transVertRadioButton.addEventListener('change', e => {
+        if (e.target.checked && transVertTextArea.innerText === '') {
+          transVertTextArea.value = renderer.translatedVertexShaderSource;
+        }
+      }, true);
+    }
+
+    transFragTextArea = doc.getElementById('trans-frag');
+    const transFragRadioButton = doc.getElementById('tab-trans-frag');
+    if (transFragRadioButton !== null) {
+      transFragRadioButton.addEventListener('change', e => {
+        if (e.target.checked && transFragTextArea.innerText === '') {
+          transFragTextArea.value = renderer.translatedFragmentShaderSource;
+        }
+      }, true);
+    }
+
     loadContentScript();
     global.setInterval(loadContentScript, 1000);
   });
@@ -219,10 +257,16 @@
    * Resize canvas.
    */
   function resizeContent() {
-    const w = global.innerWidth / scale;
-    const h = Math.max(0, global.innerHeight - headerArea.offsetHeight - footerArea.offsetHeight) / scale;
-    canvas.width = w;
-    canvas.height = h;
+    const sw = global.innerWidth / scale;
+    const h = Math.max(0, global.innerHeight - headerArea.offsetHeight - footerArea.offsetHeight - tabAreaSpan.offsetHeight);
+    const sh = h / scale;
+
+    canvas.width = sw;
+    canvas.height = sh;
+    compilerMessagesTextArea.style.height = Math.max(0, h - 8) + 'px';
+    transVertTextArea.style.height = Math.max(0, h - 8) + 'px';
+    transFragTextArea.style.height = Math.max(0, h - 8) + 'px';
+
     render();
   }
 
@@ -303,11 +347,23 @@
         canvas.style.display = '';
         compilerMessagesTextArea.value = '';
         compilerMessagesTextArea.style.display = 'none';
+        if (doc.getElementById('tab-trans-vert').checked) {
+          transVertTextArea.value = renderer.translatedVertexShaderSource;
+        } else {
+          transVertTextArea.value = '';
+        }
+        if (doc.getElementById('tab-trans-frag').checked) {
+          transFragTextArea.value = renderer.translatedFragmentShaderSource;
+        } else {
+          transFragTextArea.value = '';
+        }
       } catch (e) {
         console.error(e);
         canvas.style.display = 'none';
         compilerMessagesTextArea.value = e.message;
         compilerMessagesTextArea.style.display = '';
+        transVertTextArea.value = '';
+        transFragTextArea.value = '';
       }
     }
 

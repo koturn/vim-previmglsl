@@ -41,6 +41,31 @@ class GlslQuadRenderer {
    */
   #defaultVs300es = null;
   /**
+   * Vertex shader.
+   * @type {WebGLShader}
+   */
+  #vertexShader;
+  /**
+   * Cache of translated vertex shader source.
+   * @type {string}
+   */
+  #translatedVsSource;
+  /**
+   * Fragment shader.
+   * @type {WebGLShader}
+   */
+  #fragmentShader;
+  /**
+   * Cache of translated fragment shader source.
+   * @type {string}
+   */
+  #translatedFsSource;
+  /**
+   * WebGL extension of WEBGL_debug_shaders.
+   * @type {Object}
+   */
+  #extDebugShader;
+  /**
    * WebGL extension of EXT_disjoint_timer_query or EXT_disjoint_timer_query_webgl2.
    * @type {Object}
    */
@@ -80,6 +105,11 @@ class GlslQuadRenderer {
     this.#gl = gl;
     this.#uniformLocations = new Array(3);
 
+    this.#vertexShader = null;
+    this.#translatedVsSource = null;
+    this.#fragmentShader = null;
+    this.#translatedFsSource = null;
+    this.#extDebugShader = gl.getExtension('WEBGL_debug_shaders');
     this.#extDisjointTimerQuery = gl.getExtension('EXT_disjoint_timer_query_webgl2')
       || gl.getExtension('EXT_disjoint_timer_query');
     this.disableMeasureFrametime();
@@ -93,9 +123,18 @@ class GlslQuadRenderer {
   build(fsText, vsText) {
     const gl = this.#gl;
 
+    this.#vertexShader = null;
+    this.#translatedVsSource = null;
+    this.#fragmentShader = null;
+    this.#translatedFsSource = null;
+
     const vs = typeof vsText !== 'undefined' ? this.#createShaderFromText(vsText, gl.VERTEX_SHADER)
       : fsText.match(/^\s*#\s*version\s+300\s+es/) === null ? this.#getVertexShader100es()
       : this.#getVertexShader300es();
+    if (this.#extDebugShader !== null) {
+      this.#vertexShader = vs;
+    }
+
     const fs = this.#createShaderFromText(fsText, gl.FRAGMENT_SHADER);
 
     const program = this.#createProgram(vs, fs);
@@ -112,6 +151,10 @@ class GlslQuadRenderer {
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.#createIbo(GlslQuadRenderer.#triangles));
 
     gl.clearColor(0.0, 0.0, 0.0, 1.0);
+
+    if (this.#extDebugShader !== null) {
+      this.#fragmentShader = fs;
+    }
   }
 
   /**
@@ -274,6 +317,36 @@ class GlslQuadRenderer {
    */
   getFrameTime() {
     return this.#retrieveFrametime();
+  }
+
+  /**
+   * Get translated vertex shader source.
+   * @return {string} Translated vertex shader source.
+   */
+  get translatedVertexShaderSource() {
+    if (this.#translatedVsSource !== null) {
+      return this.#translatedVsSource;
+    }
+    if (this.#extDebugShader === null || this.#vertexShader === null) {
+      return null;
+    }
+    this.#translatedVsSource = this.#extDebugShader.getTranslatedShaderSource(this.#vertexShader)
+    return this.#translatedVsSource;
+  }
+
+  /**
+   * Get translated fragment shader source.
+   * @return {string} Translated fragment shader source.
+   */
+  get translatedFragmentShaderSource() {
+    if (this.#translatedFsSource !== null) {
+      return this.#translatedFsSource;
+    }
+    if (this.#extDebugShader === null || this.#fragmentShader === null) {
+      return null;
+    }
+    this.#translatedFsSource = this.#extDebugShader.getTranslatedShaderSource(this.#fragmentShader)
+    return this.#translatedFsSource;
   }
 
   /**

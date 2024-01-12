@@ -35,3 +35,32 @@ canvas {
   width: 100%;
   resize: none;
 }
+.tab-label {
+  color: White;
+  background: LightGray;
+  margin-right: 5px;
+  padding: 3px 12px;
+  order: -1;
+}
+.tab-content {
+  width: 100%;
+  display: none;
+}
+.tab-switch:checked+.tab-label {
+  background: DeepSkyBlue;
+}
+#tab-area:has(#tab-canvas:checked) ~ #tab-content-canvas,
+#tab-area:has(#tab-trans-vert:checked) ~ #tab-content-trans-vert,
+#tab-area:has(#tab-trans-frag:checked) ~ #tab-content-trans-frag {
+  display: block;
+}
+.tab-switch {
+  display: none;
+}
+.translated-code {
+  color: white;
+  background-color: black;
+  overflow: auto;
+  width: 100%;
+  resize: none;
+}

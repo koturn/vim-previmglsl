@@ -36,9 +36,30 @@
 </header>
 
 <main>
-  <div id="preview"></div>
-  <textarea id="compiler-messages" readonly></textarea>
-  <canvas id="canvas" width="512" height="512"></canvas>
+  <div class="tab-wrap">
+    <span id="tab-area">
+      <input id="tab-canvas" type="radio" name="tab-main" class="tab-switch" checked="checked" />
+      <label class="tab-label" for="tab-canvas">Canvas</label>
+      <input id="tab-trans-vert" type="radio" name="tab-main" class="tab-switch" />
+      <label class="tab-label" for="tab-trans-vert">Translated Vertex Shader</label>
+      <input id="tab-trans-frag" type="radio" name="tab-main" class="tab-switch" />
+      <label class="tab-label" for="tab-trans-frag">Translated Fragment Shader</label>
+    </span>
+
+    <div id="tab-content-canvas" class="tab-content">
+      <div id="preview"></div>
+      <textarea id="compiler-messages" readonly></textarea>
+      <canvas id="canvas" width="512" height="512"></canvas>
+    </div>
+
+    <div id="tab-content-trans-vert" class="tab-content">
+      <textarea id="trans-vert" class="translated-code" readonly></textarea>
+    </div>
+
+    <div id="tab-content-trans-frag" class="tab-content">
+      <textarea id="trans-frag" class="translated-code" readonly></textarea>
+    </div>
+  </div>
 </main>
 
 <footer id="footer">
@@ -53,5 +74,6 @@
     <span id="frametime-checkbox-label">Frametime</span>
   </div>
 </footer>
+
 </body>
 </html>

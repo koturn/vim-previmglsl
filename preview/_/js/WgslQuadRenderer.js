@@ -244,6 +244,22 @@ class WgslQuadRenderer {
   }
 
   /**
+   * Get translated vertex shader source. (not supported)
+   * @return {string} Always null.
+   */
+  get translatedVertexShaderSource() {
+    return null;
+  }
+
+  /**
+   * Get translated fragment shader source. (not supported)
+   * @return {string} Always null.
+   */
+  get translatedFragmentShaderSource() {
+    return null;
+  }
+
+  /**
    * Create instance of this class.
    * @param {HTMLCanvasElement} canvas Render target canvas.
    * @return {WgslQuadRenderer} Instance of this class.
