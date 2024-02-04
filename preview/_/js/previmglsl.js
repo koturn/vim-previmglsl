@@ -320,6 +320,7 @@
         if (renderer === null) {
           if (getFileType() === 'glsl') {
             renderer = new GlslQuadRenderer(canvas);
+            renderer.useBackBuffer = true;
             doc.title = 'GLSL Preview';
           } else {
             renderer = await WgslQuadRenderer.create(canvas);

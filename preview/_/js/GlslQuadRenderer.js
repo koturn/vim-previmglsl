@@ -31,6 +31,16 @@ class GlslQuadRenderer {
    */
   #uniformLocations;
   /**
+   * A flag whether use back buffer in sahder or not.
+   * @type {boolean}
+   */
+  #useBackBuffer;
+  /**
+   * Previout frame texture dictionary.
+   * @type {Object}
+   */
+  #prevFrame;
+  /**
    * A flag whether shader has been already built or not.
    * @type {boolean}
    */
@@ -109,6 +119,8 @@ class GlslQuadRenderer {
     }
     this.#gl = gl;
     this.#uniformLocations = new Array(4);
+    this.#useBackBuffer = false;
+    this.#prevFrame = null;
     this.#hasBuilt = false;
 
     this.#vertexShader = null;
@@ -150,6 +162,10 @@ class GlslQuadRenderer {
     this.#uniformLocations[1] = gl.getUniformLocation(program, 'u_mouse');
     this.#uniformLocations[2] = gl.getUniformLocation(program, 'u_resolution');
     this.#uniformLocations[3] = gl.getUniformLocation(program, 'u_frameCount');
+    if (this.#useBackBuffer) {
+      gl.uniform1i(gl.getUniformLocation(program, 'u_backbuffer'), 0);
+      this.#prevFrame = this.#createFrameTexture(gl.drawingBufferWidth, gl.drawingBufferHeight);
+    }
 
     const attribLocation = gl.getAttribLocation(program, 'position');
     gl.bindBuffer(gl.ARRAY_BUFFER, this.#createVbo(GlslQuadRenderer.#vertices));
@@ -193,9 +209,26 @@ class GlslQuadRenderer {
 
     const query = this.#beginMeasurement();
 
+    if (this.#useBackBuffer) {
+      gl.activeTexture(gl.TEXTURE0);
+      gl.bindTexture(gl.TEXTURE_2D, this.#prevFrame.texture);
+    }
+
     gl.viewport(0, 0, width, height);
     gl.clear(gl.COLOR_BUFFER_BIT);
     gl.drawElements(gl.TRIANGLES, 6, gl.UNSIGNED_SHORT, 0);
+
+    if (this.#useBackBuffer) {
+      // Resize back buffer texture.
+      if (this.#prevFrame.width !== width || this.#prevFrame.height !== height) {
+        this.#prevFrame = this.#createFrameTexture(width, height);
+      }
+      // Copy rendering result to back buffer texture.
+      // gl.activeTexture(gl.TEXTURE0);
+      // gl.bindTexture(gl.TEXTURE_2D, this.#prevFrame.texture);
+      gl.copyTexImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 0, 0, width, height, 0);
+    }
+
     gl.flush();
 
     this.#endMeasurement(query);
@@ -320,6 +353,21 @@ class GlslQuadRenderer {
     this.#endMeasurement = query => {};
     this.#updateFrametime = () => {};
     this.#retrieveFrametime = () => -1;
+  }
+
+  /**
+   * Get a flag whether use back buffer in sahder or not.
+   * @return {boolean} True if use back buffer, otherwise false.
+   */
+  get useBackBuffer() {
+    return this.#useBackBuffer;
+  }
+
+  /**
+   * Set a flag whether use back buffer in sahder or not.
+   */
+  set useBackBuffer(value) {
+    this.#useBackBuffer = value;
   }
 
   /**
@@ -456,6 +504,31 @@ class GlslQuadRenderer {
     gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, triangles, gl.STATIC_DRAW);
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
     return ibo;
+  }
+
+  /**
+   * Create frame texture.
+   * @param {number} width Width of texture.
+   * @param {number} height Height of texture.
+   * @return {Object} Dictionary of texture, its width and height.
+   */
+  #createFrameTexture(width, height) {
+    const gl = this.#gl;
+    const texture = gl.createTexture();
+
+    gl.activeTexture(gl.TEXTURE0);
+    gl.bindTexture(gl.TEXTURE_2D, texture);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, width, height, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+
+    return {
+      texture: texture,
+      width: width,
+      height: height
+    };
   }
 
   /**
