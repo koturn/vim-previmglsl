@@ -127,7 +127,7 @@
         return;
       }
       scale = target.value;
-      render();
+      resizeContent();
     }, true);
 
     targetFpsLabel = doc.getElementById('target-fps-label');
