@@ -107,8 +107,8 @@
     footerArea = doc.getElementById('footer');
     canvas = doc.getElementById('canvas');
     canvas.addEventListener('mousemove', e => {
-      mx = e.offsetX / canvas.width;
-      my = e.offsetY / canvas.height;
+      mx = e.offsetX / (canvas.width * scale);
+      my = (1.0 - e.offsetY / (canvas.height * scale));
     }, true);
     canvas.addEventListener('click', () => {
       if (animator.isStopped) {
