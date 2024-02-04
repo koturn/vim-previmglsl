@@ -108,7 +108,7 @@ class GlslQuadRenderer {
       throw new Error('WebGL 2.0 or WebGL is not supported.');
     }
     this.#gl = gl;
-    this.#uniformLocations = new Array(3);
+    this.#uniformLocations = new Array(4);
     this.#hasBuilt = false;
 
     this.#vertexShader = null;
@@ -149,6 +149,7 @@ class GlslQuadRenderer {
     this.#uniformLocations[0] = gl.getUniformLocation(program, 'u_time');
     this.#uniformLocations[1] = gl.getUniformLocation(program, 'u_mouse');
     this.#uniformLocations[2] = gl.getUniformLocation(program, 'u_resolution');
+    this.#uniformLocations[3] = gl.getUniformLocation(program, 'u_frameCount');
 
     const attribLocation = gl.getAttribLocation(program, 'position');
     gl.bindBuffer(gl.ARRAY_BUFFER, this.#createVbo(GlslQuadRenderer.#vertices));
@@ -172,12 +173,14 @@ class GlslQuadRenderer {
    * @param {number} my Mouse move offset of Y.
    * @param {number} width Width of viewport.
    * @param {number} height Height of viewport.
+   * @param {number} frameCount Frame count.
    */
-  setUniforms(time, mx, my, width, height) {
+  setUniforms(time, mx, my, width, height, frameCount) {
     const gl = this.#gl;
     gl.uniform1f(this.#uniformLocations[0], time);
     gl.uniform2f(this.#uniformLocations[1], mx, my);
     gl.uniform2f(this.#uniformLocations[2], width, height);
+    gl.uniform1f(this.#uniformLocations[3], frameCount);
   }
 
   /**

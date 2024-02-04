@@ -188,14 +188,15 @@ class WgslQuadRenderer {
    * @param {number} my Mouse move offset of Y.
    * @param {number} width Width of viewport.
    * @param {number} height Height of viewport.
+   * @param {number} frameCount Frame count.
    */
-  setUniforms(time, mx, my, width, height) {
+  setUniforms(time, mx, my, width, height, frameCount) {
     this.#uniformDataArray[0] = time;
-    this.#uniformDataArray[1] = 0.0;  // Padding of struct.
-    this.#uniformDataArray[2] = mx;
-    this.#uniformDataArray[3] = my;
-    this.#uniformDataArray[4] = width;
-    this.#uniformDataArray[5] = height;
+    this.#uniformDataArray[1] = mx;
+    this.#uniformDataArray[2] = my;
+    this.#uniformDataArray[3] = width;
+    this.#uniformDataArray[4] = height;
+    this.#uniformDataArray[5] = frameCount;
     this.#device.queue.writeBuffer(this.#uniformBuffer, 0, this.#uniformDataArray);
   }
 
@@ -303,7 +304,8 @@ class WgslQuadRenderer {
 struct Uniforms {
   time : f32,
   mouse : vec2<f32>,
-  resolution : vec2<f32>
+  resolution : vec2<f32>,
+  frameCount : f32
 }
 @binding(0) @group(0) var<uniform> uniforms : Uniforms;
 

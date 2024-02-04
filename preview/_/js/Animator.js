@@ -30,6 +30,11 @@ class Animator {
    */
   #smoothedTimePerFrame;
   /**
+   * Frame counter.
+   * @type {number}
+   */
+  #frameCount;
+  /**
    * Stop animation function.
    * @type {function}
    */
@@ -44,6 +49,7 @@ class Animator {
     this.#timePerFrame = 0.0;
     this.#totalElapsedTime = 0.0;
     this.#smoothedTimePerFrame = 0.0;
+    this.#frameCount = 0;
     this.#stop = null;
   }
 
@@ -90,6 +96,7 @@ class Animator {
     };
 
     f(prevTime, 0.0, 0.0);
+    this.#frameCount++;
     if (typeof interval === 'undefined') {
       let loop = now => {
         this.#timePerFrame = now - prevTime;
@@ -98,6 +105,7 @@ class Animator {
         this.#smoothedTimePerFrame = updateSmoothedTimePerFrame(this.#timePerFrame);
 
         f(now, this.#timePerFrame, this.#smoothedTimePerFrame);
+        this.#frameCount++;
 
         id = requestAnimationFrame(loop);
       };
@@ -113,6 +121,7 @@ class Animator {
         this.#smoothedTimePerFrame = updateSmoothedTimePerFrame(this.#timePerFrame);
 
         f(now, this.#timePerFrame, this.#smoothedTimePerFrame);
+        this.#frameCount++;
       }, interval);
       this.#stop = () => clearInterval(id);
     }
@@ -143,6 +152,7 @@ class Animator {
     this.#startTime = now;
     this.#stopTime = now;
     this.#totalElapsedTime = 0.0;
+    this.#frameCount = 0;
   }
 
   /**
@@ -199,6 +209,14 @@ class Animator {
    */
   get smoothedFps() {
     return (this.isStopped || this.#smoothedTimePerFrame === 0) ? 0.0 : 1000.0 / this.#smoothedTimePerFrame;
+  }
+
+  /**
+   * Get frame count.
+   * @type {number}
+   */
+  get frameCount() {
+    return this.#frameCount;
   }
 
   /**
