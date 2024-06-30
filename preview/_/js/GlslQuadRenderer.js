@@ -21,6 +21,17 @@ class GlslQuadRenderer {
     1, 2, 3
   ]);
   /**
+   * Default uniform dictionary.
+   * @type {Object}
+   */
+  static #defaultUniformDict = {
+    'time': 'u_time',
+    'mouse': 'u_mouse',
+    'resolution': 'u_resolution',
+    'frameCount': 'u_frameCount',
+    'backBuffer': 'u_backBuffer'
+  };
+  /**
    * WebGL context of canvas.
    * @type {WebGLRenderingContext}
    */
@@ -111,7 +122,7 @@ class GlslQuadRenderer {
    * @param {HTMLCanvasElement} canvas Render target canvas.
    */
   constructor(canvas) {
-    const gl = canvas.getContext('webgl2')
+    const gl = canvas.getContext('webgl2', {alpha: false})
       || canvas.getContext('webgl')
       || canvas.getContext('experimental-webgl');
     if (gl === null) {
@@ -138,7 +149,7 @@ class GlslQuadRenderer {
    * @param {string} fsText Fragment shader source code.
    * @param {string} vsText Vertex shader source code (optional).
    */
-  build(fsText, vsText) {
+  build(fsText, vsText, uniformDict) {
     const gl = this.#gl;
 
     this.#vertexShader = null;
@@ -147,7 +158,7 @@ class GlslQuadRenderer {
     this.#translatedFsSource = null;
     this.#hasBuilt = false;
 
-    const vs = typeof vsText !== 'undefined' ? this.#createShaderFromText(vsText, gl.VERTEX_SHADER)
+    const vs = !!vsText ? this.#createShaderFromText(vsText, gl.VERTEX_SHADER)
       : fsText.match(/^\s*#\s*version\s+300\s+es/) === null ? this.#getVertexShader100es()
       : this.#getVertexShader300es();
     if (this.#extDebugShader !== null) {
@@ -158,12 +169,16 @@ class GlslQuadRenderer {
 
     const program = this.#createProgram(vs, fs);
 
-    this.#uniformLocations[0] = gl.getUniformLocation(program, 'u_time');
-    this.#uniformLocations[1] = gl.getUniformLocation(program, 'u_mouse');
-    this.#uniformLocations[2] = gl.getUniformLocation(program, 'u_resolution');
-    this.#uniformLocations[3] = gl.getUniformLocation(program, 'u_frameCount');
+    if (!uniformDict) {
+      uniformDict = GlslQuadRenderer.#defaultUniformDict;
+    }
+
+    this.#uniformLocations[0] = gl.getUniformLocation(program, typeof uniformDict.time === 'undefined' ? GlslQuadRenderer.#defaultUniformDict.time : uniformDict.time);
+    this.#uniformLocations[1] = gl.getUniformLocation(program, typeof uniformDict.mouse === 'undefined' ? GlslQuadRenderer.#defaultUniformDict.mouse : uniformDict.mouse);
+    this.#uniformLocations[2] = gl.getUniformLocation(program, typeof uniformDict.resolution === 'undefined' ? GlslQuadRenderer.#defaultUniformDict.resolution : uniformDict.resolution);
+    this.#uniformLocations[3] = gl.getUniformLocation(program, typeof uniformDict.frameCount === 'undefined' ? GlslQuadRenderer.#defaultUniformDict.frameCount : uniformDict.frameCount);
     if (this.#useBackBuffer) {
-      gl.uniform1i(gl.getUniformLocation(program, 'u_backbuffer'), 0);
+      gl.uniform1i(gl.getUniformLocation(program, typeof uniformDict.backBuffer === 'undefined' ? GlslQuadRenderer.#defaultUniformDict.backBuffer : uniformDict.backBuffer), 0);
       this.#prevFrame = this.#createFrameTexture(gl.drawingBufferWidth, gl.drawingBufferHeight);
     }
 

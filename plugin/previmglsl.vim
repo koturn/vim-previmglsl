@@ -20,7 +20,8 @@ augroup PrevimGlsl
   endif
 augroup END
 
-command! -nargs=0 PrevimGlslOpen call previmglsl#open(previmglsl#make_preview_file_path('index.html'))
+command! -nargs=* -complete=customlist,previmglsl#compl_parser PrevimGlslOpen
+      \ call previmglsl#open(previmglsl#make_preview_file_path('index.html'), previmglsl#parse_args(<q-args>))
 command! -nargs=0 PrevimGlslWipeCache call previmglsl#wipe_cache()
 command! -nargs=0 PrevimGlslRefresh call previmglsl#refresh()
 

@@ -5,9 +5,24 @@ let s:save_cpo = &cpo
 set cpo&vim
 
 let s:newline_character = "\n"
+let s:targets = [
+      \ 'twigl-geek',
+      \ 'twigl-geeker',
+      \ 'twigl-geekest',
+      \ 'twigl-geek-300es',
+      \ 'twigl-geeker-300es',
+      \ 'twigl-geekest-300es'
+      \]
+let s:opt_parser = vital#previmglsl#import('OptionParser').new()
 
-function! previmglsl#open(preview_html_file) abort " {{{
+function! s:compl_target(optlead, cmdline, cursorpos) " {{{
+  return filter(copy(s:targets), '!stridx(v:val, a:optlead)')
+endfunction " }}}
+call s:opt_parser.on('--target=TARGET', 'Target language', {'short' : '-t', 'completion' : function('s:compl_target')})
+
+function! previmglsl#open(preview_html_file, options) abort " {{{
   let b:previmglsl_opened = 1
+  let b:previmglsl_target = get(a:options, 'target', 'auto')
   call previmglsl#refresh()
   if exists('g:previmglsl_open_cmd') && !empty(g:previmglsl_open_cmd)
     if has('win32') && g:previmglsl_open_cmd =~? 'firefox'
@@ -121,6 +136,15 @@ function! previmglsl#cleanup_preview(dir) abort " {{{
   call delete(a:dir, 'rf')
 endfunction " }}}
 
+function! previmglsl#parse_args(args) abort " {{{
+  return s:opt_parser.parse(a:args)
+endfunction " }}}
+
+function! previmglsl#compl_parser(arglead, cmdline, cursorpos) " {{{
+  return s:opt_parser.complete(a:arglead, a:cmdline, a:cursorpos)
+endfunction " }}}
+
+
 " NOTE: getFileType()の必要性について。
 " js側でファイル名の拡張子から取得すればこの関数は不要だが、
 " その場合「.txtだが内部的なファイルタイプがmarkdown」といった場合に動かなくなる。
@@ -145,6 +169,9 @@ function! s:function_template() abort " {{{
         \ '}',
         \ 'function getOptions() {',
         \ printf('  return %s;', previmglsl#options()),
+        \ '}',
+        \ 'function getTarget() {',
+        \ printf('  return "%s";', b:previmglsl_target),
         \ '}',
         \], s:newline_character)
 endfunction " }}}

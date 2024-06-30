@@ -338,7 +338,9 @@
     }
 
     if (needReload && (typeof getContent === 'function') && (typeof getFileType === 'function')) {
-      const fsText = getContent();
+      const target = typeof getTarget === 'function' ? getTarget() : 'auto';
+      const fsText = preprocess(getContent(), target);
+      const uniformDict = getUniformDict(target);
       try {
         const isFirstBuild = renderer === null;
         if (renderer === null) {
@@ -365,7 +367,7 @@
         animator.stop();
 
         measureTime(
-          () => renderer.build(fsText),
+          () => renderer.build(fsText, null, uniformDict),
           elapsed => console.log('Build success: ' + new Date() + ', elapsed: ' + elapsed.toFixed(3) + ' msec'),
           elapsed => console.error('Build failed: ' + new Date() + ', elapsed: ' + elapsed.toFixed(3) + ' msec'));
 
@@ -406,18 +408,55 @@
   }
 
   /**
-   * Load javascript by creating script element.
+   * Preprocess fragment shader source by target.
+   * @param {string} fsText Fragment shader source.
+   * @param {string} target Target language.
+   * @return Preprocessed fragment shader source.
    */
-  function loadContentScript() {
-    const script = doc.createElement('script');
-    script.type = 'text/javascript';
-    script.src = 'js/content.js?t=' + new Date().getTime();
-    script.addEventListener('load', async () => {
-      await loadPreview();
-      global.setTimeout(() => script.parentNode.removeChild(script), 160);
-    });
-    doc.getElementsByTagName('head')[0].appendChild(script);
-    fpsElement.innerText = animator.smoothedFps.toFixed(2);
+  function preprocess(fsText, target) {
+    switch (target) {
+      case 'twigl-geeker':
+        return Twigl.convertGeekerFs(fsText);
+      case 'twigl-geekest':
+        return Twigl.convertGeekestFs(fsText);
+      case 'twigl-geeker-300es':
+        return Twigl.convertGeekerFs300es(fsText);
+      case 'twigl-geekest-300es':
+        return Twigl.convertGeekestFs300es(fsText);
+      default:
+        return fsText;
+    }
+  }
+
+  /**
+   * Get uniform dictionary.
+   * @param {string} target Target language.
+   * @return Name dictionary of uniform variables.
+   */
+  function getUniformDict(target) {
+    switch (target) {
+      case 'twigl-geek':
+      case 'twigl-geeker':
+      case 'twigl-geekest':
+      case 'twigl-geek-300es':
+      case 'twigl-geeker-300es':
+      case 'twigl-geekest-300es':
+        return {
+          'time': 't',
+          'mouse': 'm',
+          'resolution': 'r',
+          'frameCount': 'f',
+          'backBuffer': 'b'
+        };
+      default:
+        return {
+          'time': 'u_time',
+          'mouse': 'u_mouse',
+          'resolution': 'u_resolution',
+          'frameCount': 'u_frameCount',
+          'backBuffer': 'u_backBuffer'
+        };
+    }
   }
 
   /**
