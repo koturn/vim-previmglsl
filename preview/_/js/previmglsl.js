@@ -199,8 +199,32 @@
       }, true);
     }
 
+    let interval;
+
+    /**
+     * Load javascript by creating script element.
+     */
+    function loadContentScript() {
+      const script = doc.createElement('script');
+      script.type = 'text/javascript';
+      script.src = 'js/content.js?t=' + new Date().getTime();
+      script.addEventListener('error', () => {
+        if (typeof getOptions === 'function' && getOptions().autoClose) {
+          global.open('about:blank', '_self').close();
+        }
+        if (typeof interval !== 'undefined') {
+          global.clearInterval(interval);
+        }
+      });
+      script.addEventListener('load', async () => {
+        await loadPreview();
+        global.setTimeout(() => script.parentNode.removeChild(script), 160);
+      });
+      doc.getElementsByTagName('head')[0].appendChild(script);
+      fpsElement.innerText = animator.smoothedFps.toFixed(2);
+    }
     loadContentScript();
-    global.setInterval(loadContentScript, 1000);
+    interval = global.setInterval(loadContentScript, 1000);
   });
 
   /**
