@@ -189,6 +189,10 @@ class GlslQuadRenderer {
 
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.#createIbo(GlslQuadRenderer.#triangles));
 
+    gl.disable(gl.DEPTH_TEST);
+    gl.disable(gl.CULL_FACE);
+    gl.disable(gl.BLEND);
+
     gl.clearColor(0.0, 0.0, 0.0, 1.0);
 
     this.#hasBuilt = true;
