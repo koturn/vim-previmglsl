@@ -245,7 +245,7 @@ class GlslQuadRenderer {
       // Copy rendering result to back buffer texture.
       // gl.activeTexture(gl.TEXTURE0);
       // gl.bindTexture(gl.TEXTURE_2D, this.#prevFrame.texture);
-      gl.copyTexImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 0, 0, width, height, 0);
+      gl.copyTexImage2D(gl.TEXTURE_2D, 0, gl.RGB, 0, 0, width, height, 0);
     }
 
     gl.flush();
