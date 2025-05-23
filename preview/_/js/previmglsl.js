@@ -199,6 +199,40 @@
       }, true);
     }
 
+    doc.addEventListener('keydown', e => {
+      if (e.defaultPrevented) {
+        return;
+      }
+
+      let isHandled = false;
+      if (e.altKey && (typeof e.key !== 'undefined' && e.key === 'Enter'
+          || typeof e.keyIdentifier !== 'undefined' && e.keyIdentifier === 'Enter'
+          || typeof e.keyCode !== 'undefined' && e.keyCode === 13)) {
+        toggleFullscreen();
+        isHandled = true;
+      }
+
+      if (isHandled) {
+        e.preventDefault();
+      };
+    });
+
+    doc.addEventListener('fullscreenchange', e => {
+      const displayValue = doc.fullscreenElement === null ? '' : 'none';
+      tabAreaSpan.style.display = displayValue;
+      headerArea.style.display = displayValue;
+      footerArea.style.display = displayValue;
+      resizeContent();
+    });
+
+    global.toggleFullscreen = function() {
+      if (doc.fullscreenElement === null) {
+        canvas.requestFullscreen();
+      } else {
+        doc.exitFullscreen();
+      }
+    }
+
     let interval;
 
     /**
