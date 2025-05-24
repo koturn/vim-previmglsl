@@ -217,6 +217,8 @@
       };
     });
 
+    doc.getElementById('enter-fullscreen').addEventListener('click', e => toggleFullscreen());
+
     doc.addEventListener('fullscreenchange', e => {
       const displayValue = doc.fullscreenElement === null ? '' : 'none';
       tabAreaSpan.style.display = displayValue;

@@ -17,6 +17,21 @@ canvas {
 #header02 {
   text-align: right;
 }
+#footer {
+  display: table;
+  width: 100%;
+}
+#footer01 {
+  display: table-cell;
+  text-align: left;
+}
+#footer02 {
+  display: table-cell;
+  text-align: right;
+}
+#enter-fullscreen {
+  vertical-align: middle;
+}
 #elapsed-area {
   margin-left: 4px;
   margin-right: 4px;
