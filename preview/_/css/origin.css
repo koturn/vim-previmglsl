@@ -14,6 +14,19 @@ canvas {
   height: 100%;
   display: block;
 }
+#header01 {
+  display: table;
+  width: 100%;
+}
+#file-name {
+  display: table-cell;
+  text-align: left;
+}
+#last-modified {
+  display: table-cell;
+  text-align: right;
+  font-size: small;
+}
 #header02 {
   text-align: right;
 }
