@@ -122,9 +122,10 @@ class GlslQuadRenderer {
    * @param {HTMLCanvasElement} canvas Render target canvas.
    */
   constructor(canvas) {
-    const gl = canvas.getContext('webgl2', {alpha: false})
-      || canvas.getContext('webgl')
-      || canvas.getContext('experimental-webgl');
+    const attrs = {alpha: false};
+    const gl = canvas.getContext('webgl2', attrs)
+      || canvas.getContext('webgl', attrs)
+      || canvas.getContext('experimental-webgl', attrs);
     if (gl === null) {
       throw new Error('WebGL 2.0 or WebGL is not supported.');
     }
