@@ -333,7 +333,7 @@
   /**
    * Render created GLSL program.
    */
-  function render(now, t, st) {
+  function render() {
     if (!renderer.hasBuilt) {
       return;
     }
