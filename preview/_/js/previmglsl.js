@@ -238,40 +238,6 @@
       resizeContent();
     });
 
-    global.toggleFullscreen = function() {
-      if (doc.fullscreenElement === null) {
-        canvas.requestFullscreen();
-      } else {
-        doc.exitFullscreen();
-      }
-    };
-
-    global.downloadCanvas = function(fileName) {
-      if (typeof fileName === 'undefined') {
-        if (typeof getFileName === 'function') {
-          // Get shader file, remove suffix and add ".png" as suffix.
-          fileName = getFileName().replace(/.*[\/\\]/, '').replace(/\.[^.]*$/, '') + '.png';
-        } else {
-          fileName = 'canvas.png';
-        }
-      }
-
-      const link = doc.createElement('a');
-      link.download = fileName;
-
-      const isStopped = animator.isStopped;
-      stop();
-      render();
-      link.href = canvas.toDataURL(fileName.endsWith('.jpg') || fileName.endsWith('.jpeg') ? 'image/jpeg'
-        : fileName.endsWith('.webp') ? 'image/webp'
-        : 'image/png');
-      if (!isStopped) {
-        start();
-      }
-
-      link.click();
-    };
-
     let interval;
 
     /**
@@ -549,4 +515,51 @@
       throw e;
     }
   }
+
+  /**
+   * Toggle fullscreen.
+   */
+  function toggleFullscreen() {
+    if (doc.fullscreenElement === null) {
+      canvas.requestFullscreen();
+    } else {
+      doc.exitFullscreen();
+    }
+  }
+
+  /**
+   * Download canvas as image data.
+   * @param {string} fileName File name to donwload.
+   */
+  function downloadCanvas(fileName) {
+    if (typeof fileName === 'undefined') {
+      if (typeof getFileName === 'function') {
+        // Get shader file, remove suffix and add ".png" as suffix.
+        fileName = getFileName().replace(/.*[\/\\]/, '').replace(/\.[^.]*$/, '') + '.png';
+      } else {
+        fileName = 'canvas.png';
+      }
+    }
+
+    const link = doc.createElement('a');
+    link.download = fileName;
+
+    const isStopped = animator.isStopped;
+    stop();
+    render();
+    link.href = canvas.toDataURL(fileName.endsWith('.jpg') || fileName.endsWith('.jpeg') ? 'image/jpeg'
+      : fileName.endsWith('.webp') ? 'image/webp'
+      : 'image/png');
+    if (!isStopped) {
+      start();
+    }
+
+    link.click();
+  }
+
+  //
+  // Export functions.
+  //
+  global.toggleFullscreen = toggleFullscreen;
+  global.downloadCanvas = downloadCanvas;
 })((this || 0).self || global);
