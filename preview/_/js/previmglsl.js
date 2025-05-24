@@ -204,15 +204,26 @@
         return;
       }
 
-      let isHandled = false;
-      if (e.altKey && (typeof e.key !== 'undefined' && e.key === 'Enter'
-          || typeof e.keyIdentifier !== 'undefined' && e.keyIdentifier === 'Enter'
-          || typeof e.keyCode !== 'undefined' && e.keyCode === 13)) {
-        toggleFullscreen();
-        isHandled = true;
+      let isAltEnterPressed = false;
+      let isCtrlSPressed = false;
+      if (typeof e.key !== 'undefined') {
+        isAltEnterPressed = e.key === 'Enter' && e.altKey;
+        isCtrlSPressed = e.key === 's' && e.ctrlKey;
+      } else if (typeof e.keyIdentifier !== 'undefined') {
+        isAltEnterPressed = e.keyIdentifier === 'Enter' && e.altKey;
+        isCtrlSPressed = e.keyIdentifier === 's' && e.ctrlKey;
+      } else if (typeof e.keyCode !== 'undefined') {
+        isAltEnterPressed = e.keyCode === 13 && e.altKey;
+        isCtrlSPressed = e.keyCode === 83 && e.ctrlKey;
       }
 
-      if (isHandled) {
+      if (isAltEnterPressed) {
+        toggleFullscreen();
+      } else if (isCtrlSPressed) {
+        downloadCanvas();
+      }
+
+      if (isAltEnterPressed || isCtrlSPressed) {
         e.preventDefault();
       };
     });
@@ -233,7 +244,33 @@
       } else {
         doc.exitFullscreen();
       }
-    }
+    };
+
+    global.downloadCanvas = function(fileName) {
+      if (typeof fileName === 'undefined') {
+        if (typeof getFileName === 'function') {
+          // Get shader file, remove suffix and add ".png" as suffix.
+          fileName = getFileName().replace(/.*[\/\\]/, '').replace(/\.[^.]*$/, '') + '.png';
+        } else {
+          fileName = 'canvas.png';
+        }
+      }
+
+      const link = doc.createElement('a');
+      link.download = fileName;
+
+      const isStopped = animator.isStopped;
+      stop();
+      render();
+      link.href = canvas.toDataURL(fileName.endsWith('.jpg') || fileName.endsWith('.jpeg') ? 'image/jpeg'
+        : fileName.endsWith('.webp') ? 'image/webp'
+        : 'image/png');
+      if (!isStopped) {
+        start();
+      }
+
+      link.click();
+    };
 
     let interval;
 
