@@ -42,6 +42,9 @@ canvas {
   display: table-cell;
   text-align: right;
 }
+#button-download {
+  vertical-align: middle;
+}
 #enter-fullscreen {
   vertical-align: middle;
 }

@@ -228,6 +228,27 @@
       };
     });
 
+    doc.getElementById('button-download').addEventListener('click', e => {
+      const selectedValue = doc.getElementById('select-download-type').value;
+      const baseFileName = getFileName().replace(/.*[\/\\]/, '').replace(/\.[^.]*$/, '');
+      switch (selectedValue) {
+        case 'png':
+          downloadCanvas(baseFileName + '.png');
+          break;
+        case 'jpeg':
+          downloadCanvas(baseFileName + '.jpg');
+          break;
+        case 'webp':
+          downloadCanvas(baseFileName + '.webp');
+          break;
+        case 'html':
+          downloadSingleHtml(baseFileName + '.html');
+          break;
+        default:
+          throw new Error('Unrecognized download type: ' + selectedValue);
+      }
+    });
+
     doc.getElementById('enter-fullscreen').addEventListener('click', e => toggleFullscreen());
 
     doc.addEventListener('fullscreenchange', e => {
@@ -516,17 +537,6 @@
   }
 
   /**
-   * Toggle fullscreen.
-   */
-  function toggleFullscreen() {
-    if (doc.fullscreenElement === null) {
-      canvas.requestFullscreen();
-    } else {
-      doc.exitFullscreen();
-    }
-  }
-
-  /**
    * Download canvas as image data.
    * @param {string} fileName File name to donwload.
    */
@@ -737,10 +747,21 @@ ${isGlsl ? '  renderer.useBackBuffer = true;' : ''}
     link.click();
   }
 
+  /**
+   * Toggle fullscreen.
+   */
+  function toggleFullscreen() {
+    if (doc.fullscreenElement === null) {
+      canvas.requestFullscreen();
+    } else {
+      doc.exitFullscreen();
+    }
+  }
+
   //
   // Export functions.
   //
-  global.toggleFullscreen = toggleFullscreen;
   global.downloadCanvas = downloadCanvas;
   global.downloadSingleHtml = downloadSingleHtml;
+  global.toggleFullscreen = toggleFullscreen;
 })((this || 0).self || global);
