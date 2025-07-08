@@ -378,7 +378,7 @@
 
     if (needReload && (typeof getContent === 'function') && (typeof getFileType === 'function')) {
       const target = typeof getTarget === 'function' ? getTarget() : 'auto';
-      const fsText = preprocess(getContent(), target);
+      const fsSource = preprocess(getContent(), target);
       const uniformDict = getUniformDict(target);
       try {
         const isFirstBuild = renderer === null;
@@ -396,7 +396,6 @@
             frametimeElement = null;
             frametimeAreaElement.remove();
             frametimeAreaElement = null;
-            doc.getElementById('frametime-area').remove();
             doc.getElementById('frametime-checkbox').remove();
             doc.getElementById('frametime-checkbox-label').remove();
           }
@@ -406,7 +405,7 @@
         animator.stop();
 
         measureTime(
-          () => renderer.build(fsText, null, uniformDict),
+          () => renderer.build(fsSource, null, uniformDict),
           elapsed => console.log('Build success: ' + new Date() + ', elapsed: ' + elapsed.toFixed(3) + ' msec'),
           elapsed => console.error('Build failed: ' + new Date() + ', elapsed: ' + elapsed.toFixed(3) + ' msec'));
 
@@ -448,22 +447,22 @@
 
   /**
    * Preprocess fragment shader source by target.
-   * @param {string} fsText Fragment shader source.
+   * @param {string} fsSource Fragment shader source.
    * @param {string} target Target language.
    * @return Preprocessed fragment shader source.
    */
-  function preprocess(fsText, target) {
+  function preprocess(fsSource, target) {
     switch (target) {
       case 'twigl-geeker':
-        return Twigl.convertGeekerFs(fsText);
+        return Twigl.convertGeekerFs(fsSource);
       case 'twigl-geekest':
-        return Twigl.convertGeekestFs(fsText);
+        return Twigl.convertGeekestFs(fsSource);
       case 'twigl-geeker-300es':
-        return Twigl.convertGeekerFs300es(fsText);
+        return Twigl.convertGeekerFs300es(fsSource);
       case 'twigl-geekest-300es':
-        return Twigl.convertGeekestFs300es(fsText);
+        return Twigl.convertGeekestFs300es(fsSource);
       default:
-        return fsText;
+        return fsSource;
     }
   }
 
@@ -557,9 +556,191 @@
     link.click();
   }
 
+  function downloadSingleHtml(fileName) {
+    if (typeof fileName === 'undefined') {
+      if (typeof getFileName === 'function') {
+        // Get shader file, remove suffix and add ".png" as suffix.
+        fileName = getFileName().replace(/.*[\/\\]/, '').replace(/\.[^.]*$/, '') + '.html';
+      } else {
+        fileName = 'canvas.png';
+      }
+    }
+
+    const isGlsl = getFileType() === 'glsl';
+    const htmlText = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="Content-Language" content="en">
+  <meta name="google" content="notranslate">
+  <title>${doc.title}</title>
+  <style>
+  body {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+  }
+  canvas {
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+  </style>
+</head>
+<body>
+
+<canvas id="canvas" width="512" height="512"></canvas>
+
+<script id="vertex-shader" type="x-shader/x-vertex">${renderer.vertexShaderSource}
+</script>
+<script id="fragment-shader" type="x-shader/x-fragment">${renderer.fragmentShaderSource}
+</script>
+<script>
+${isGlsl ? GlslQuadRenderer.toString() : WgslQuadRenderer.toString()}
+</script>
+<script>
+${Animator.toString()}
+</script>
+<script>
+(function(global, doc) {
+  'use strict';
+
+  /**
+   * Animator.
+   * @type {Animator}
+   */
+  const canvas = doc.getElementById('canvas');
+  /**
+   * Animator.
+   * @type {Animator}
+   */
+  const animator = new Animator();
+  /**
+   * GLSL renderer.
+   * @type {GlslQuadRenderer}
+   */
+  const renderer = ${isGlsl ? 'new GlslQuadRenderer(canvas)' : 'await WgslQuadRenderer.create(canvas)'};
+  /**
+   * Mouse move offset of X.
+   * @type {number}
+   */
+  let mx = 0.0;
+  /**
+   * Mouse move offset of Y.
+   * @type {number}
+   */
+  let my = 0.0;
+
+  /**
+   * Render created GLSL program.
+   */
+  function render() {
+    const time = animator.totalElapsedTime * 0.001;
+
+    const w = canvas.width;
+    const h = canvas.height;
+
+    renderer.setUniforms(time, mx, my, w, h);
+    renderer.render(w, h);
+  }
+
+  /**
+   * Resize canvas.
+   */
+  function resizeContent() {
+    canvas.width = global.innerWidth;
+    canvas.height = global.innerHeight;
+    render();
+  }
+
+  /**
+   * Measure time.
+   * @param {function} f Measure target action.
+   * @param {function(number)} onSuccess Callback function on success.
+   * @param {function(number)} onFailure Callback function on failure.
+   */
+  function measureTime(f, onSuccess, onFailure) {
+    const startTime = performance.now();
+    try {
+      f();
+      const t1 = performance.now();
+      onSuccess(performance.now() - startTime);
+    } catch (e) {
+      onFailure(performance.now() - startTime);
+      throw e;
+    }
+  }
+
+  /**
+   * Toggle fullscreen.
+   */
+  function toggleFullscreen() {
+    if (doc.fullscreenElement === null) {
+      canvas.requestFullscreen();
+    } else {
+      doc.exitFullscreen();
+    }
+  }
+
+  global.addEventListener('resize', resizeContent, true);
+
+  doc.addEventListener('keydown', e => {
+    if (e.defaultPrevented) {
+      return;
+    }
+
+    let isAltEnterPressed = false;
+    if (typeof e.key !== 'undefined') {
+      isAltEnterPressed = e.key === 'Enter' && e.altKey;
+    } else if (typeof e.keyIdentifier !== 'undefined') {
+      isAltEnterPressed = e.keyIdentifier === 'Enter' && e.altKey;
+    } else if (typeof e.keyCode !== 'undefined') {
+      isAltEnterPressed = e.keyCode === 13 && e.altKey;
+    }
+
+    if (isAltEnterPressed) {
+      toggleFullscreen();
+      e.preventDefault();
+    }
+  });
+
+  canvas.addEventListener('mousemove', e => {
+    mx = e.offsetX / (canvas.width);
+    my = (1.0 - e.offsetY / (canvas.height));
+  }, true);
+
+${isGlsl ? '  renderer.useBackBuffer = true;' : ''}
+  try {
+    const vsSource = doc.getElementById('vertex-shader').innerText;
+    const fsSource = doc.getElementById('fragment-shader').innerText;
+    const uniformDict = ${JSON.stringify(getUniformDict(typeof getTarget === 'function' ? getTarget() : 'auto'))};
+    measureTime(
+      () => renderer.build(fsSource, vsSource${isGlsl ? ', uniformDict' : ''}),
+      elapsed => console.log('Build success: ' + new Date() + ', elapsed: ' + elapsed.toFixed(3) + ' msec'),
+      elapsed => console.error('Build failed: ' + new Date() + ', elapsed: ' + elapsed.toFixed(3) + ' msec'));
+    resizeContent();
+  } catch (e) {
+    console.error(e);
+  }
+
+  animator.start(render);
+})((this || 0).self || global, document);
+</script>
+
+</body>
+</html>
+`;
+
+    const link = doc.createElement('a');
+    link.download = fileName;
+    link.href = URL.createObjectURL(new Blob([htmlText], {type: 'application/octet-stream'}));
+    link.click();
+  }
+
   //
   // Export functions.
   //
   global.toggleFullscreen = toggleFullscreen;
   global.downloadCanvas = downloadCanvas;
+  global.downloadSingleHtml = downloadSingleHtml;
 })((this || 0).self || global);

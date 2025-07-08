@@ -67,6 +67,11 @@ class GlslQuadRenderer {
    */
   #defaultVs300es = null;
   /**
+   * Vertex shader that succeeded to compile.
+   * @type {String}
+   */
+  #vsSource = null;
+  /**
    * Vertex shader.
    * @type {WebGLShader}
    */
@@ -76,6 +81,11 @@ class GlslQuadRenderer {
    * @type {string}
    */
   #translatedVsSource;
+  /**
+   * Fragment shader that succeeded to compile.
+   * @type {String}
+   */
+  #fsSource = null;
   /**
    * Fragment shader.
    * @type {WebGLShader}
@@ -147,10 +157,10 @@ class GlslQuadRenderer {
 
   /**
    * Build shader program.
-   * @param {string} fsText Fragment shader source code.
-   * @param {string} vsText Vertex shader source code (optional).
+   * @param {string} fsSource Fragment shader source code.
+   * @param {string} vsSource Vertex shader source code (optional).
    */
-  build(fsText, vsText, uniformDict) {
+  build(fsSource, vsSource, uniformDict) {
     const gl = this.#gl;
 
     this.#vertexShader = null;
@@ -159,14 +169,24 @@ class GlslQuadRenderer {
     this.#translatedFsSource = null;
     this.#hasBuilt = false;
 
-    const vs = !!vsText ? this.#createShaderFromText(vsText, gl.VERTEX_SHADER)
-      : fsText.match(/^\s*#\s*version\s+300\s+es/) === null ? this.#getVertexShader100es()
-      : this.#getVertexShader300es();
+    let vs;
+    if (!!vsSource) {
+      vs = this.#createShaderFromText(vsSource, gl.VERTEX_SHADER);
+      this.#vsSource = vsSource;
+    } else if (fsSource.match(/^\s*#\s*version\s+300\s+es/) !== null) {
+      vs = this.#getVertexShader300es();
+      this.#vsSource = GlslQuadRenderer.vsSource300es;
+    } else {
+      vs = this.#getVertexShader100es();
+      this.#vsSource = GlslQuadRenderer.vsSource100es;
+    }
+
     if (this.#extDebugShader !== null) {
       this.#vertexShader = vs;
     }
 
-    const fs = this.#createShaderFromText(fsText, gl.FRAGMENT_SHADER);
+    const fs = this.#createShaderFromText(fsSource, gl.FRAGMENT_SHADER);
+    this.#fsSource = fsSource;
 
     const program = this.#createProgram(vs, fs);
 
@@ -407,6 +427,14 @@ class GlslQuadRenderer {
   }
 
   /**
+   * Vertex shader source code.
+   * @type {string}
+   */
+  get vertexShaderSource() {
+    return this.#vsSource;
+  }
+
+  /**
    * Get translated vertex shader source.
    * @return {string} Translated vertex shader source.
    */
@@ -419,6 +447,14 @@ class GlslQuadRenderer {
     }
     this.#translatedVsSource = this.#extDebugShader.getTranslatedShaderSource(this.#vertexShader)
     return this.#translatedVsSource;
+  }
+
+  /**
+   * Fragment shader source code for GLSL ES 1.0.
+   * @type {string}
+   */
+  get fragmentShaderSource() {
+    return this.#fsSource;
   }
 
   /**
@@ -442,7 +478,7 @@ class GlslQuadRenderer {
    */
   #getVertexShader100es() {
     if (this.#defaultVs100es === null) {
-      this.#defaultVs100es = this.#createShaderFromText(GlslQuadRenderer.vsText100es, this.#gl.VERTEX_SHADER);
+      this.#defaultVs100es = this.#createShaderFromText(GlslQuadRenderer.vsSource100es, this.#gl.VERTEX_SHADER);
     }
     return this.#defaultVs100es;
   }
@@ -453,7 +489,7 @@ class GlslQuadRenderer {
    */
   #getVertexShader300es() {
     if (this.#defaultVs300es === null) {
-      this.#defaultVs300es = this.#createShaderFromText(GlslQuadRenderer.vsText300es, this.#gl.VERTEX_SHADER);
+      this.#defaultVs300es = this.#createShaderFromText(GlslQuadRenderer.vsSource300es, this.#gl.VERTEX_SHADER);
     }
     return this.#defaultVs300es;
   }
@@ -552,18 +588,10 @@ class GlslQuadRenderer {
   }
 
   /**
-   * Vertex shader source code for GLSL ES 1.0.
-   * @type {string}
-   */
-  static get vsText100es() {
-    return "attribute vec3 position;\nvoid main(void)\n{\n  gl_Position = vec4(position, 1.0);\n}\n";
-  }
-
-  /**
    * Vertex shader source code for GLSL ES 3.0.
    * @type {string}
    */
-  static get vsText300es() {
+  static get vsSource300es() {
     return "#version 300 es\nin vec3 position;\nvoid main(void)\n{\n  gl_Position = vec4(position, 1.0);\n}\n";
   }
 }

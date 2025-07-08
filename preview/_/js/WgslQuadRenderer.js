@@ -67,6 +67,16 @@ class WgslQuadRenderer {
    */
   #uniformDataArray;
   /**
+   * Vertex shader that succeeded to compile.
+   * @type {String}
+   */
+  #vsSource = null;
+  /**
+   * Fragment shader that succeeded to compile.
+   * @type {String}
+   */
+  #fsSource = null;
+  /**
    * A flag whether shader has been already built or not.
    * @type {boolean}
    */
@@ -120,12 +130,12 @@ class WgslQuadRenderer {
 
   /**
    * Build shader program.
-   * @param {string} fsText Fragment shader source code.
-   * @param {string} vsText Vertex shader source code (optional).
+   * @param {string} fsSource Fragment shader source code.
+   * @param {string} vsSource Vertex shader source code (optional).
    */
-  build(fsText, vsText) {
-    if (typeof vsText === 'undefined') {
-      vsText = WgslQuadRenderer.vsDefaultText;
+  build(fsSource, vsSource) {
+    if (!vsSource) {
+      vsSource = WgslQuadRenderer.vsDefaultText;
     }
 
     this.#hasBuilt = false;
@@ -134,7 +144,7 @@ class WgslQuadRenderer {
       layout: 'auto',
       vertex: {
         module: this.#device.createShaderModule({
-          code: vsText
+          code: vsSource
         }),
         entryPoint: 'main',
         buffers: [
@@ -152,7 +162,7 @@ class WgslQuadRenderer {
       },
       fragment: {
         module: this.#device.createShaderModule({
-          code: fsText
+          code: fsSource
         }),
         entryPoint: 'main',
         targets: [
@@ -177,6 +187,9 @@ class WgslQuadRenderer {
         }
       ]
     });
+
+    this.#vsSource = vsSource;
+    this.#fsSource = fsSource;
 
     this.#hasBuilt = true;
   }
@@ -264,11 +277,27 @@ class WgslQuadRenderer {
   }
 
   /**
+   * Vertex shader source code.
+   * @type {string}
+   */
+  get vertexShaderSource() {
+    return this.#vsSource;
+  }
+
+  /**
    * Get translated vertex shader source. (not supported)
    * @return {string} Always null.
    */
   get translatedVertexShaderSource() {
     return null;
+  }
+
+  /**
+   * Fragment shader source code for GLSL ES 1.0.
+   * @type {string}
+   */
+  get fragmentShaderSource() {
+    return this.#fsSource;
   }
 
   /**
