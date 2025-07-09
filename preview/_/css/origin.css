@@ -42,12 +42,6 @@ canvas {
   display: table-cell;
   text-align: right;
 }
-#button-download {
-  vertical-align: middle;
-}
-#enter-fullscreen {
-  vertical-align: middle;
-}
 #elapsed-area {
   margin-left: 4px;
   margin-right: 4px;
@@ -97,4 +91,7 @@ canvas {
   width: 100%;
   resize: none;
   font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+}
+.footer-item {
+  vertical-align: middle;
 }

@@ -65,17 +65,27 @@
 
 <footer id="footer">
   <span id="footer01">
+    <svg id="button-stop" class="footer-item" x="0px" y="0px" width="16px" height="16px" viewBox="0 0 512 512" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve">
+      <style type="text/css">.st0{fill:#4B4B4B;}</style>
+      <g>
+        <rect y="20.885" class="st0" width="188.088" height="470.23" style="fill: rgb(0, 0, 0);"></rect>
+        <rect x="323.912" y="20.885" class="st0" width="188.088" height="470.23" style="fill: rgb(0, 0, 0);"></rect>
+      </g>
+    </svg>
+    <svg id="button-start" class="footer-item" style="display: none" x="0px" y="0px" width="16" height="16" viewBox="0 0 256 256">
+      <path d="M16 16 L256 128 L16 256 Z" style="fill: rgb(0, 0, 0)"></path>
+    </svg>
     <span>Scale:</span>
-    <input id="scale" type="number" min="0.25" max="8" value="1"/>
-    <input id="vsync-checkbox" type="checkbox" checked/>
+    <input id="scale" class="footer-item" type="number" min="0.25" max="8" value="1"/>
+    <input id="vsync-checkbox" class="footer-item" type="checkbox" checked/>
     <span>VSync</span>
     <span id="target-fps-label">Target FPS:</span>
-    <input id="target-fps" type="number" min="1" max="144" step="1" value="60" disabled/>
-    <input id="frametime-checkbox" type="checkbox" checked/>
+    <input id="target-fps" class="footer-item" type="number" min="1" max="144" step="1" value="60" disabled/>
+    <input id="frametime-checkbox" class="footer-item" type="checkbox" checked/>
     <span id="frametime-checkbox-label">Frametime</span>
   </span>
   <span id="footer02">
-    <svg id="button-download" width="16px" height="16px" viewBox="0 0 512 512" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" xml:space="preserve">
+    <svg id="button-download" class="footer-item" x="0px" y="0px" width="16px" height="16px" viewBox="0 0 512 512" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve">
       <style type="text/css">.st0{fill:#4B4B4B;}</style>
       <g>
         <path class="st0" d="M243.591,309.362c3.272,4.317,7.678,6.692,12.409,6.692c4.73,0,9.136-2.376,12.409-6.689l89.594-118.094
@@ -85,14 +95,13 @@
         <path class="st0" d="M445.218,294.16v111.304H66.782V294.16H0v152.648c0,14.03,11.413,25.443,25.441,25.443h461.118 c14.028,0,25.441-11.413,25.441-25.443V294.16H445.218z" style="fill: rgb(0, 0, 0);"></path>
       </g>
     </svg>
-
-    <select id="select-download-type">
+    <select id="select-download-type" class="footer-item">
       <option value="png">PNG</option>
       <option value="jpeg">JPEG</option>
       <option value="webp">WEBP</option>
       <option value="html">Single HTML</option>
     </select>
-    <svg id="enter-fullscreen" width="16px" height="16px" viewBox="0 0 16 16" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <svg id="enter-fullscreen" class="footer-item" width="16px" height="16px" viewBox="0 0 16 16" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
       <title>Enter Fullscreen</title>
       <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
         <g transform="translate(-683.000000, -3437.000000)">

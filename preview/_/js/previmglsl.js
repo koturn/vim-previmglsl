@@ -52,6 +52,16 @@
    */
   let frametimeAreaElement;
   /**
+   * Icon button to stop playing.
+   * @type {SVGElement}
+   */
+  let buttonStop;
+  /**
+   * Icon button to start playing.
+   * @type {SVGElement}
+   */
+  let buttonStart;
+  /**
    * Checkbox to switch VSync.
    * @type {HTMLInputElement}
    */
@@ -109,14 +119,6 @@
     canvas.addEventListener('mousemove', e => {
       mx = e.offsetX / (canvas.width * scale);
       my = (1.0 - e.offsetY / (canvas.height * scale));
-    }, true);
-    canvas.addEventListener('click', () => {
-      if (animator.isStopped) {
-        start();
-      } else {
-        stop();
-        render();
-      }
     }, true);
 
     const scaleSelect = doc.getElementById('scale');
@@ -204,20 +206,33 @@
         return;
       }
 
+      console.log(e);
+
+      let isTogglePlayingPressed = false;
       let isAltEnterPressed = false;
       let isCtrlSPressed = false;
       if (typeof e.key !== 'undefined') {
+        isTogglePlayingPressed = e.key === ' ' || e.key === 'k';
         isAltEnterPressed = e.key === 'Enter' && e.altKey;
         isCtrlSPressed = e.key === 's' && e.ctrlKey;
       } else if (typeof e.keyIdentifier !== 'undefined') {
+        isTogglePlayingPressed = e.keyIdentifier === ' ' || e.keyIdentifier === 'k';
         isAltEnterPressed = e.keyIdentifier === 'Enter' && e.altKey;
         isCtrlSPressed = e.keyIdentifier === 's' && e.ctrlKey;
       } else if (typeof e.keyCode !== 'undefined') {
-        isAltEnterPressed = e.keyCode === 13 && e.altKey;
-        isCtrlSPressed = e.keyCode === 83 && e.ctrlKey;
+        isTogglePlayingPressed = e.keyCode === 0x20 || e.keyCode === 0x4b;
+        isAltEnterPressed = e.keyCode === 0x0d && e.altKey;
+        isCtrlSPressed = e.keyCode === 0x53 && e.ctrlKey;
       }
 
-      if (isAltEnterPressed) {
+      if (isTogglePlayingPressed) {
+        if (animator.isStopped) {
+          start();
+        } else {
+          stop();
+          render();
+        }
+      } else if (isAltEnterPressed) {
         toggleFullscreen();
       } else if (isCtrlSPressed) {
         downloadCanvas();
@@ -227,6 +242,17 @@
         e.preventDefault();
       };
     });
+
+    buttonStop = doc.getElementById('button-stop');
+    buttonStop.addEventListener('click', e => {
+      stop();
+      render();
+    }, true);
+
+    buttonStart = doc.getElementById('button-start');
+    buttonStart.addEventListener('click', e => {
+      start();
+    }, true);
 
     doc.getElementById('button-download').addEventListener('click', e => {
       const selectedValue = doc.getElementById('select-download-type').value;
@@ -328,6 +354,8 @@
       console.log('Start animation: Interval: ' + interval + ' msec');
       animator.start(render, interval);
     }
+    buttonStop.style.display = '';
+    buttonStart.style.display = 'none';
   }
 
   /**
@@ -335,6 +363,8 @@
    */
   function stop() {
     animator.stop();
+    buttonStop.style.display = 'none';
+    buttonStart.style.display = '';
   }
 
   /**
