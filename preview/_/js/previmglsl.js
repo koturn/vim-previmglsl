@@ -7,6 +7,22 @@
    */
   const doc = global.document;
   /**
+   * Class definition of Animator.
+   */
+  const Animator = global.Animator.noConflict();
+  /**
+   * Class definition of Twigl.
+   */
+  const Twigl = global.Twigl.noConflict();
+  /**
+   * Class definition of GlslQuadRenderer.
+   */
+  const GlslQuadRenderer = global.GlslQuadRenderer.noConflict();
+  /**
+   * Class definition of WgslQuadRenderer.
+   */
+  const WgslQuadRenderer = global.WgslQuadRenderer.noConflict();
+  /**
    * Animator.
    * @type {Animator}
    */

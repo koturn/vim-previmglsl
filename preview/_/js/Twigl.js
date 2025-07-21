@@ -1,36 +1,97 @@
-/**
- * twigl Preprocessor.
- * @see {@link https://github.com/doxas/twigl}
- */
-class Twigl {
-  /**
-   * Convert twigl fragment shader source to GLSL fragment shader source.
-   * @param {string} code twigl fragment shader source.
-   * @param {string} type twigl source type.
-   * @return GLSL ES (3.0) fragment shader source
-   */
-  static convert(code, type) {
-    switch (type) {
-      case 'geeker':
-        return Twigl.convertGeekerFs(code);
-      case 'geekest':
-        return Twigl.convertGeekestFs(code);
-      case 'geeker-300es':
-        return Twigl.convertGeekerFs300es(code);
-      case 'geekest-300es':
-        return Twigl.convertGeekestFs300es(code);
-      default:
-        return code;
+;(function(moduleDef) {
+  'use strict';
+
+  // https://github.com/kriskowal/q
+
+  // This file will function properly as a <script> tag,
+  // or a module using CommonJS and NodeJS or RequireJS module formats.
+  // In Common/Node/RequireJS, the module exports the Twigl API
+  // and when executed as a simple <script>, it creates a Twigl global instead.
+
+  if (typeof bootstrap === 'function') {
+    // Montage Require
+    bootstrap('promise', moduleDef);
+  } else if (typeof exports === 'object' && typeof module === 'object') {
+    // NodeJS or CommonJS
+    module.exports = moduleDef();
+  } else if (typeof define === 'function' && define.amd) {
+    // RequireJS
+    define(moduleDef);
+  } else if (typeof ses !== 'undefined') {
+    // SES (Secure EcmaScript)
+    if (!ses.ok()) {
+      return;
+    } else {
+      ses.makeTwigl = moduleDef;
     }
+  } else if (typeof window !== 'undefined' || typeof self !== 'undefined') {
+    // <script>
+    // Prefer window over self for add-on scripts.
+    // Use self for non-windowed contexts.
+    let global = typeof window !== 'undefined' ? window
+      : typeof self !== 'undefined' ? self
+      : null;
+    if (global === null) {
+      // SpiderMonkey or Rhino
+      try {
+        global = Function('return this')();
+      } catch (Error) {
+        throw new Error('This environment was not anticipated by hoge.js.');
+      }
+    }
+
+    // Get the `window` object, save the previous Twigl global
+    // and initialize Twigl as a global.
+    const prevDefinition = global.Twigl;
+    global.Twigl = moduleDef();
+
+    // Add a noConflict function so Twigl can be removed from
+    // the global namespace.
+    global.Twigl.noConflict = function() {
+      if (typeof prevDefinition === 'undefined') {
+        delete global.Twigl;
+      } else {
+        global.Twigl = prevDefinition;
+      }
+      return this;
+    };
   }
+})(function() {
+  'use strict';
 
   /**
-   * Convert twigl geeker fragment shader source to GLSL ES fragment shader source
-   * @param {string} code twigl geeker fragment shader source.
-   * @return GLSL ES fragment shader source
+   * twigl Preprocessor.
+   * @see {@link https://github.com/doxas/twigl}
    */
-  static convertGeekerFs(code) {
-    return `precision highp float;
+  return class Twigl {
+    /**
+     * Convert twigl fragment shader source to GLSL fragment shader source.
+     * @param {string} code twigl fragment shader source.
+     * @param {string} type twigl source type.
+     * @return GLSL ES (3.0) fragment shader source
+     */
+    static convert(code, type) {
+      switch (type) {
+        case 'geeker':
+          return Twigl.convertGeekerFs(code);
+        case 'geekest':
+          return Twigl.convertGeekestFs(code);
+        case 'geeker-300es':
+          return Twigl.convertGeekerFs300es(code);
+        case 'geekest-300es':
+          return Twigl.convertGeekestFs300es(code);
+        default:
+          return code;
+      }
+    }
+
+    /**
+     * Convert twigl geeker fragment shader source to GLSL ES fragment shader source
+     * @param {string} code twigl geeker fragment shader source.
+     * @return GLSL ES fragment shader source
+     */
+    static convertGeekerFs(code) {
+      return `precision highp float;
 uniform vec2 r;  // Screen resolution.
 uniform vec2 m;  // Mouse position.
 uniform float t;  // Elapsed time.
@@ -40,15 +101,15 @@ uniform sampler2D b;  // Back buffer.
 #line 1
 ${code}
 `;
-  }
+    }
 
-  /**
-   * Convert twigl geekest fragment shader source to GLSL ES fragment shader source
-   * @param {string} code twigl geekest fragment shader source.
-   * @return GLSL ES fragment shader source
-   */
-  static convertGeekestFs(code) {
-    return `precision highp float;
+    /**
+     * Convert twigl geekest fragment shader source to GLSL ES fragment shader source
+     * @param {string} code twigl geekest fragment shader source.
+     * @return GLSL ES fragment shader source
+     */
+    static convertGeekestFs(code) {
+      return `precision highp float;
 uniform vec2 r;  // Screen resolution.
 uniform vec2 m;  // Mouse position.
 uniform float t;  // Elapsed time.
@@ -62,15 +123,15 @@ void main() {
 ${code}
 }
 `;
-  }
+    }
 
-  /**
-   * Convert twigl geeker(300 es) fragment shader source to GLSL ES 3.0 fragment shader source.
-   * @param {string} code twigl geeker(300 es) fragment shader source.
-   * @return GLSL ES 3.0 fragment shader source.
-   */
-  static convertGeekerFs300es(code) {
-    return `#version 300 es
+    /**
+     * Convert twigl geeker(300 es) fragment shader source to GLSL ES 3.0 fragment shader source.
+     * @param {string} code twigl geeker(300 es) fragment shader source.
+     * @return GLSL ES 3.0 fragment shader source.
+     */
+    static convertGeekerFs300es(code) {
+      return `#version 300 es
 precision highp float;
 uniform vec2 r;  // Screen resolution.
 uniform vec2 m;  // Mouse position.
@@ -82,15 +143,15 @@ out vec4 o;  // Output color.
 #line 1
 ${code}
 `;
-  }
+    }
 
-  /**
-   * Convert twigl geekest(300 es) fragment shader source to GLSL ES 3.0 fragment shader source.
-   * @param {string} code twigl geekest(300 es) fragment shader source.
-   * @return GLSL ES 3.0 fragment shader source.
-   */
-  static convertGeekestFs300es(code) {
-    return `#version 300 es
+    /**
+     * Convert twigl geekest(300 es) fragment shader source to GLSL ES 3.0 fragment shader source.
+     * @param {string} code twigl geekest(300 es) fragment shader source.
+     * @return GLSL ES 3.0 fragment shader source.
+     */
+    static convertGeekestFs300es(code) {
+      return `#version 300 es
 precision highp float;
 uniform vec2 r;  // Screen resolution.
 uniform vec2 m;  // Mouse position.
@@ -105,29 +166,29 @@ void main() {
 #line 1
 ${code}
 }
-`;
-  }
+  `;
+    }
 
-  /**
-   * GLSL noise library.
-   * @type {string}
-   * @see {@link https://github.com/ashima/webgl-noise}
-   * @see {@link https://github.com/stegu/webgl-noise}
-   */
-  static get glNoiseLibrary() {
-    //
-    // Description : Array and textureless GLSL 2D simplex noise function.
-    //      Author : Ian McEwan, Ashima Arts.
-    //  Maintainer : stegu
-    //     Lastmod : 20110822 (ijm)
-    //     License : Copyright (C) 2011 Ashima Arts. All rights reserved.
-    //               Distributed under the MIT License. See LICENSE file.
-    //               https://github.com/ashima/webgl-noise
-    //               https://github.com/stegu/webgl-noise
-    //
+    /**
+     * GLSL noise library.
+     * @type {string}
+     * @see {@link https://github.com/ashima/webgl-noise}
+     * @see {@link https://github.com/stegu/webgl-noise}
+     */
+    static get glNoiseLibrary() {
+      //
+      // Description : Array and textureless GLSL 2D simplex noise function.
+      //      Author : Ian McEwan, Ashima Arts.
+      //  Maintainer : stegu
+      //     Lastmod : 20110822 (ijm)
+      //     License : Copyright (C) 2011 Ashima Arts. All rights reserved.
+      //               Distributed under the MIT License. See LICENSE file.
+      //               https://github.com/ashima/webgl-noise
+      //               https://github.com/stegu/webgl-noise
+      //
 
-    // (sqrt(5) - 1)/4 = F4, used once below
-    return `#define F4 0.309016994374947451
+      // (sqrt(5) - 1)/4 = F4, used once below
+      return `#define F4 0.309016994374947451
 float mod289(float x){return x - floor(x * (1.0 / 289.0)) * 289.0;}
 vec2  mod289(vec2 x) {return x - floor(x * (1.0 / 289.0)) * 289.0;}
 vec3  mod289(vec3 x) {return x - floor(x * (1.0 / 289.0)) * 289.0;}
@@ -370,5 +431,13 @@ mat3 rotate3D(float angle, vec3 axis){
 const float PI = 3.141592653589793;
 const float PI2 = PI * 2.0;
 `;
+    }
+
+    /**
+     * noConflict() for non global.
+     */
+    static noConflict() {
+      throw new Error('Twigl.noConflict only works when Twigl is used as a global');
+    }
   }
-}
+});
