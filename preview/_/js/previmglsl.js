@@ -636,15 +636,17 @@
 <script id="fragment-shader" type="x-shader/x-fragment">${renderer.fragmentShaderSource}
 </script>
 <script>
-${isGlsl ? GlslQuadRenderer.toString() : WgslQuadRenderer.toString()}
-</script>
-<script>
-${Animator.toString()}
-</script>
-<script>
 (function(global, doc) {
   'use strict';
 
+  /**
+   * ${isGlsl ? 'GLSL' : 'WGSL'} renderer.
+   */
+  ${isGlsl ? GlslQuadRenderer.toString() : WgslQuadRenderer.toString()}
+  /**
+   * Class for calling functions at regular intervals.
+   */
+  ${Animator.toString()}
   /**
    * Animator.
    * @type {Animator}
