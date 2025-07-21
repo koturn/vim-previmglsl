@@ -73,9 +73,9 @@
     ]);
     /**
      * Triangle index data array.
-     * @type {Int16Array}
+     * @type {Uint16Array}
      */
-    static #triangles = new Int16Array([
+    static #triangles = new Uint16Array([
       0, 2, 1,
       1, 2, 3
     ]);
@@ -609,7 +609,7 @@
 
     /**
      * Create IBO (Index Buffer Object).
-     * @param {Int16Array} Triangle index data array.
+     * @param {Uint16Array} Triangle index data array.
      * @return {WebGLBuffer} Created IBO.
      */
     #createIbo(triangles) {
