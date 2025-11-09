@@ -652,7 +652,7 @@
 <script id="fragment-shader" type="x-shader/x-fragment">${renderer.fragmentShaderSource}
 </script>
 <script>
-(function(global, doc) {
+(${isGlsl ? '' : 'async '}function(global, doc) {
   'use strict';
 
   /**
