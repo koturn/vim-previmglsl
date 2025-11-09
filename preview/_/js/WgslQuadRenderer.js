@@ -179,7 +179,8 @@
       this.#indicesBuffer = indicesBuffer;
 
       const uniformBuffer = device.createBuffer({
-        size: 6 * Float32Array.BYTES_PER_ELEMENT,  // 24 is minumum binding size.
+        // size: 6 * Float32Array.BYTES_PER_ELEMENT,
+        size: 8 * Float32Array.BYTES_PER_ELEMENT,  // 32 is minimum binding size.
         usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST
       });
       this.#uniformBuffer = uniformBuffer;
@@ -265,11 +266,11 @@
      * @param {number} frameCount Frame count.
      */
     setUniforms(time, mx, my, width, height, frameCount) {
-      this.#uniformDataArray[0] = time;
-      this.#uniformDataArray[1] = mx;
-      this.#uniformDataArray[2] = my;
-      this.#uniformDataArray[3] = width;
-      this.#uniformDataArray[4] = height;
+      this.#uniformDataArray[0] = width;
+      this.#uniformDataArray[1] = height;
+      this.#uniformDataArray[2] = mx;
+      this.#uniformDataArray[3] = my;
+      this.#uniformDataArray[4] = time;
       this.#uniformDataArray[5] = frameCount;
       this.#device.queue.writeBuffer(this.#uniformBuffer, 0, this.#uniformDataArray);
     }
@@ -387,24 +388,24 @@
      */
     static get vsDefaultText() {
       return `struct VertexOutput {
-  @builtin(position) Position : vec4<f32>,
+  @builtin(position) position: vec4f,
   @location(0) fragCoord : vec2<f32>
 }
 
 struct Uniforms {
-  time : f32,
-  mouse : vec2<f32>,
-  resolution : vec2<f32>,
-  frameCount : f32
+  resolution: vec2f,
+  mouse: vec2f,
+  time: f32,
+  frameCount: f32
 }
 @binding(0) @group(0) var<uniform> uniforms : Uniforms;
 
 @vertex
 fn main(
-  @location(0) position: vec4<f32>
+  @location(0) position: vec4f
 ) -> VertexOutput {
-  var output : VertexOutput;
-  output.Position = position;
+  var output: VertexOutput;
+  output.position = position;
   output.fragCoord = (position.xy * vec2<f32>(0.5, 0.5) + vec2<f32>(0.5, 0.5)) * uniforms.resolution.xy;
 
   return output;
