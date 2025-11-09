@@ -97,10 +97,19 @@
     </svg>
     <select id="select-download-type" class="footer-item">
       <option value="png">PNG</option>
+      <option value="png-current">PNG (Current Size)</option>
+      <option value="png-full">PNG (Full Size)</option>
       <option value="jpeg">JPEG</option>
+      <option value="jpeg-current">JPEG (Current Size)</option>
+      <option value="jpeg-full">JPEG (Full Size)</option>
       <option value="webp">WEBP</option>
+      <option value="webp-current">WEBP (Current Size)</option>
+      <option value="webp-full">WEBP (Full Size)</option>
       <option value="html">Single HTML</option>
     </select>
+    <input id="image-width" class="footer-item" type="number" min="1" max="7680" step="1" value="1920"/>
+    <span class="footer-item">x</span>
+    <input id="image-height" class="footer-item" type="number" min="1" max="4320" step="1" value="1080"/>
     <svg id="enter-fullscreen" class="footer-item" width="16px" height="16px" viewBox="0 0 16 16" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
       <title>Enter Fullscreen</title>
       <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">

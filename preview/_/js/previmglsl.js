@@ -93,6 +93,16 @@
    */
   let targetFps;
   /**
+   * Number input of width of download image.
+   * @type {HTMLInputElement}
+   */
+  let imageWidthNumberInput;
+  /**
+   * Number input of width of download image.
+   * @type {HTMLInputElement}
+   */
+  let imageHeightNumberInput;
+  /**
    * Comiler messages area.
    * @type {HTMLTextAreaElement}
    */
@@ -275,13 +285,31 @@
       const baseFileName = getFileName().replace(/.*[\/\\]/, '').replace(/\.[^.]*$/, '');
       switch (selectedValue) {
         case 'png':
+          downloadCanvasAtSpecifiedSize(baseFileName + '.png');
+          break;
+        case 'png-current':
           downloadCanvas(baseFileName + '.png');
           break;
+        case 'png-full':
+          downloadCanvasAtFullScreenSize(baseFileName + '.png');
+          break;
         case 'jpeg':
+          downloadCanvasAtSpecifiedSize(baseFileName + '.jpg');
+          break;
+        case 'jpeg-current':
           downloadCanvas(baseFileName + '.jpg');
           break;
+        case 'jpeg-full':
+          downloadCanvasAtFullScreenSize(baseFileName + '.jpg');
+          break;
         case 'webp':
+          downloadCanvasAtSpecifiedSize(baseFileName + '.webp');
+          break;
+        case 'webp-current':
           downloadCanvas(baseFileName + '.webp');
+          break;
+        case 'webp-full':
+          downloadCanvasAtFullScreenSize(baseFileName + '.webp');
           break;
         case 'html':
           downloadSingleHtml(baseFileName + '.html');
@@ -290,6 +318,15 @@
           throw new Error('Unrecognized download type: ' + selectedValue);
       }
     });
+
+    imageWidthNumberInput = doc.getElementById('image-width');
+    imageHeightNumberInput = doc.getElementById('image-height');
+    doc.getElementById('select-download-type').addEventListener('change', e => {
+      const value = e.target.value;
+      const isDisabled = value !== 'png' && value !== 'jpen' && value !== 'webp';
+      imageWidthNumberInput.disabled = isDisabled;
+      imageHeightNumberInput.disabled = isDisabled;
+    }, true);
 
     doc.getElementById('enter-fullscreen').addEventListener('click', e => toggleFullscreen());
 
@@ -585,8 +622,10 @@
   /**
    * Download canvas as image data.
    * @param {string} fileName File name to donwload.
+   * @param {number} width Desired image width to save.
+   * @param {number} height Desired image height to save.
    */
-  function downloadCanvas(fileName) {
+  function downloadCanvas(fileName, width, height) {
     if (typeof fileName === 'undefined') {
       if (typeof getFileName === 'function') {
         // Get shader file, remove suffix and add ".png" as suffix.
@@ -595,21 +634,76 @@
         fileName = 'canvas.png';
       }
     }
-
-    const link = doc.createElement('a');
-    link.download = fileName;
+    const oldWidth = canvas.width;
+    const oldHeight = canvas.height;
+    if (typeof width === 'undefined') {
+      width = oldWidth;
+    }
+    if (typeof height === 'undefined') {
+      height = oldHeight;
+    }
 
     const isStopped = animator.isStopped;
     stop();
+
+    if (width !== oldWidth || height !== oldHeight) {
+      canvas.width = width;
+      canvas.height = height;
+    }
+
     render();
-    link.href = canvas.toDataURL(fileName.endsWith('.jpg') || fileName.endsWith('.jpeg') ? 'image/jpeg'
-      : fileName.endsWith('.webp') ? 'image/webp'
-      : 'image/png');
+
+    const link = doc.createElement('a');
+    link.download = fileName;
+    link.href = canvas.toDataURL(identifyMimeTypeByFileName(fileName));
+    link.click();
+
+    if (width !== oldWidth || height !== oldHeight) {
+      canvas.width = oldWidth;
+      canvas.height = oldHeight;
+      render();
+    }
+
     if (!isStopped) {
       start();
     }
+  }
 
-    link.click();
+  /**
+   * Download canvas as image data at inputed size.
+   * @param {string} fileName File name to donwload.
+   */
+  function downloadCanvasAtSpecifiedSize(fileName) {
+    let width = Number.parseInt(imageWidthNumberInput.value);
+    let height = Number.parseInt(imageHeightNumberInput.value);
+    downloadCanvas(fileName, width, height);
+  }
+
+  /**
+   * Download canvas as image data at fullscreen size.
+   * @param {string} fileName File name to donwload.
+   */
+  function downloadCanvasAtFullScreenSize(fileName) {
+    downloadCanvas(fileName, global.screen.width, global.screen.height);
+  }
+
+  /**
+   * Identify MIME type by file name.
+   * @param {string} fileName File name to donwload.
+   * @return MIME type string.
+   */
+  function identifyMimeTypeByFileName(fileName) {
+    var lowerFileName = fileName.toLowerCase();
+    if (lowerFileName.endsWith('.png')) {
+      return 'image/png';
+    }
+    if (lowerFileName.endsWith('.jpg') || lowerFileName.endsWith('.jpeg')) {
+      return 'image/jpeg';
+    }
+    if (lowerFileName.endsWith('.webp')) {
+      return 'image/webp';
+    }
+    throw new Error('Failed to identify MIME type by file name: ' + lowerFileName);
   }
 
   function downloadSingleHtml(fileName) {
@@ -810,6 +904,7 @@ ${isGlsl ? '  renderer.useBackBuffer = true;' : ''}
   // Export functions.
   //
   global.downloadCanvas = downloadCanvas;
+  global.downloadCanvasAtFullScreenSize = downloadCanvasAtFullScreenSize;
   global.downloadSingleHtml = downloadSingleHtml;
   global.toggleFullscreen = toggleFullscreen;
 })((this || 0).self || global);
