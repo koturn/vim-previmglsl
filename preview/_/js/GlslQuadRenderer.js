@@ -386,7 +386,9 @@
           const gl = this.#gl;
 
           if (gl.getParameter(this.#extDisjointTimerQuery.GPU_DISJOINT_EXT)) {
-            usingList.forEach(query => gl.deleteQuery(query));
+            for (let query of usingList) {
+              gl.deleteQuery(query)
+            }
             return;
           }
 
@@ -423,7 +425,9 @@
           const ext = this.#extDisjointTimerQuery;
 
           if (this.#gl.getParameter(ext.GPU_DISJOINT_EXT)) {
-            usingList.forEach(query => ext.deleteQueryEXT(query));
+            for (let query of usingList) {
+              ext.deleteQueryEXT(query);
+            }
             return;
           }
 
