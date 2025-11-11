@@ -24,7 +24,7 @@
     } else {
       ses.makeTwigl = moduleDef;
     }
-  } else if (typeof window !== 'undefined' || typeof self !== 'undefined') {
+  } else {
     // <script>
     // Prefer window over self for add-on scripts.
     // Use self for non-windowed contexts.
