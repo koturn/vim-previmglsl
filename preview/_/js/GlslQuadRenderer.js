@@ -651,6 +651,14 @@
     }
 
     /**
+     * Vertex shader source code for GLSL ES 1.0.
+     * @type {string}
+     */
+    static get vsSource100es() {
+      return "attribute vec3 position;\nvoid main(void)\n{\n  gl_Position = vec4(position, 1.0);\n}\n";
+    }
+
+    /**
      * Vertex shader source code for GLSL ES 3.0.
      * @type {string}
      */
